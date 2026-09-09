@@ -79,6 +79,51 @@ Components: list view (`cds--data-table`), fields, form sheet, statusbar
 (`cds--modal`), dropdowns (`cds--menu`), notifications, tags and status badges
 (`cds--tag`) and kanban records (`cds--tile`).
 
+## Brand colours
+
+**Settings → Companies → _(company)_ → Carbon Theme**, per company.
+
+The brand colour is not a header tint. It sets Carbon's *interactive* role, so
+one value reaches primary buttons, links, focus rings, selected rows, active
+tabs, the status bar and the search-panel rule — everywhere the theme draws on
+`--cds-interactive`. The header is configured separately, because tinting the
+bar and rebranding the controls are different decisions.
+
+**Light and dark are separate fields on purpose.** Carbon does not reuse one
+interactive tone across themes: its own is Blue 60 `#0f62fe` on g10 and the
+lighter Blue 50 `#4589ff` on g100, because a mid-dark colour that reads well on
+`#f4f4f4` does not carry against `#161616`. Set only the light one and the dark
+variant is derived by lightening it; set both to control each exactly.
+
+Hover, active and text-on-brand are derived too — hover darkens in light and
+brightens in dark, and the label flips between near-black and near-white for
+contrast. Anything left empty falls back to Carbon's own value, so a company
+that sets one colour still gets a coherent palette.
+
+Nothing is emitted at all until a company sets something.
+
+### How it is delivered
+
+A `<style>` block injected into the webclient head *after* the asset bundles —
+not a generated stylesheet. Every value is a CSS custom property, so nothing
+needs compiling, and since Odoo picks the theme server-side only the variant in
+use is emitted.
+
+It needs no `!important`. Buttons look like they would: Odoo compiles `.btn-*`
+to literals from `$o-btns-bs-override`. But Bootstrap 5.3's `button-variant()`
+writes `--btn-bg` / `--btn-hover-bg` / … and `.btn` reads them back (Odoo sets
+`$variable-prefix` to `''`), so setting those properties makes Bootstrap's own
+rules serve our values. The header is the one surface needing plain
+declarations, since the theme compiles it from `$o-navbar-*`.
+
+Shades are computed in Python rather than emitted as `darken()`: these are
+custom property values, and Sass does not evaluate functions inside them — a
+function would reach the browser as literal text and be silently ignored.
+
+> Not compatible with OCA's `web_company_color`. That module injects its own
+> palette as `!important` CSS after every bundle and overwrites the theme
+> wholesale; this replaces it rather than coexisting with it.
+
 ## The drift guard
 
 Every check in `tools/audit.mjs` guards a failure that is **silent** — the theme keeps loading and one surface quietly reverts to stock Odoo:

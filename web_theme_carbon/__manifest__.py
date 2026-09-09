@@ -12,6 +12,10 @@
     "license": "AGPL-3",
     "depends": ["web", "web_responsive", "web_dark_mode"],
     "installable": True,
+    "data": [
+        "views/res_company_views.xml",
+        "views/webclient_templates.xml",
+    ],
     "application": False,
     # After web_responsive (1) and web_dark_mode so our assets sort last.
     "sequence": 3,

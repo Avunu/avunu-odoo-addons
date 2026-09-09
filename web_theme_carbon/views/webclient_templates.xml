@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <!--
+        Injected INSIDE head_web, which puts it after the asset bundles, so the
+        company's tokens override the theme's compiled defaults without needing
+        !important.
+
+        A <style> block rather than a generated stylesheet: every value is a CSS
+        custom property, so nothing needs compiling; the head is rendered per
+        request anyway; and because Odoo picks the theme server-side, only the
+        variant actually in use is emitted. _carbon_brand_style() returns empty
+        when no company has customised anything.
+    -->
+    <template
+        id="webclient_bootstrap_carbon"
+        inherit_id="web.webclient_bootstrap"
+        name="Carbon brand colours"
+    >
+        <xpath expr="//t[@t-set='head_web']">
+            <style
+                type="text/css"
+                t-out="env['res.company']._carbon_brand_style()"
+            />
+        </xpath>
+    </template>
+</odoo>

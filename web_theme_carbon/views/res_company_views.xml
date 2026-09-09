@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <record id="view_company_form_carbon" model="ir.ui.view">
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page
+                    string="Carbon Theme"
+                    name="carbon_theme"
+                    groups="base.group_system"
+                >
+                    <div
+                        class="alert alert-info d-flex align-items-center"
+                        role="alert"
+                    >
+                        <span
+                            class="fa fa-info-circle fa-2x me-3"
+                            title="Information"
+                            aria-hidden="true"
+                        />
+                        <div>
+                            <b>The brand colour is used throughout the interface, not just on the header.</b>
+                            <div class="text-muted">
+                                It sets primary buttons, links, focus rings, selected rows,
+                                active tabs, the status bar and the search panel — everywhere
+                                Carbon uses its interactive colour. The header is configured
+                                separately below.
+                            </div>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Brand colour" name="carbon_brand">
+                            <field name="carbon_brand_light" widget="color" />
+                            <field name="carbon_brand_dark" widget="color" />
+                            <div colspan="2" class="text-muted small">
+                                Light and dark are set separately because Carbon uses a
+                                lighter tone on dark backgrounds — a colour that reads
+                                well on white does not carry against near-black. Leave
+                                the dark one empty and it is derived from the light one.
+                            </div>
+                        </group>
+                        <group string="Header" name="carbon_header">
+                            <field name="carbon_header_bg" widget="color" />
+                            <field name="carbon_header_text" widget="color" />
+                            <div colspan="2" class="text-muted small">
+                                Carbon keeps its header near-black in both themes. Leave
+                                these empty for the Carbon default; the text colour is
+                                chosen automatically for contrast if left unset.
+                            </div>
+                        </group>
+                    </group>
+                    <div
+                        class="alert alert-secondary d-flex align-items-center mt-2"
+                        role="alert"
+                    >
+                        <span
+                            class="fa fa-refresh fa-2x me-3"
+                            title="Reload required"
+                            aria-hidden="true"
+                        />
+                        <div>Reload the page for changes to take effect.</div>
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
