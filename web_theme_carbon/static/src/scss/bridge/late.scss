@@ -1,0 +1,130 @@
+// Carbon -> Bootstrap bridge, plus Odoo's non-!default variables (light / g10).
+//
+// Spliced immediately before web/static/src/scss/bootstrap_overridden.scss,
+// which puts it AFTER every web/static/src/**/*.variables.scss and after
+// secondary_variables.scss. That position is the point: it is the only place
+// that can reach
+//
+//   (a) the handful of Odoo variables declared WITHOUT !default, where an
+//       earlier assignment would simply be overwritten, and
+//   (b) the raw Bootstrap $vars that Odoo's $o-* layer never exposes.
+//
+// Same rule as the primary bridge: literals only, never var(--cds-*).
+
+// == Odoo variables declared without !default ================================
+// These are plain re-assignments; there is nothing to lose to.
+$o-search-panel-width: 256px;          // 16rem, Carbon side-nav
+$o-search-panel-font-size: 1em;
+$o-search-bar-facet-value-width: 16rem;
+// Collapses the statusbar's clip-path chevrons into plain rectangles, which is
+// what turns it into a Carbon content-switcher without touching the markup:
+//   polygon(0 0, calc(100% - W) 0, 100% 50%, ...) with W = 0 is a rectangle.
+$o-statusbar-arrow-width: 0;
+$o-field-translate-padding: 32px;
+
+// web_responsive/static/src/legacy/scss/form_variable.scss also hard-assigns
+// these two, and we load after it.
+$o-form-renderer-max-width: 2600px;
+$o-form-view-sheet-max-width: 1584px;  // Carbon's max grid width
+
+// Set directly rather than letting secondary_variables.scss derive it as
+// invert($o-view-background-color, 10%), which on a white sheet is near-black.
+$o-form-separator-color: $c-border-subtle;
+
+// == Bootstrap ===============================================================
+// One line that repaints ~125 usages across every addon.
+$border-color: $c-border-subtle !default;
+// Square the utility classes too, or .rounded-3/-4/-5 survive as !important
+// rules baked into OWL templates that no selector of ours can outrank.
+$border-radius-xl: 0 !default;
+$border-radius-xxl: 0 !default;
+$border-radius-pill: 50rem !default;   // tags and avatars stay round
+
+// Carbon's single elevation, applied everywhere. $box-shadow-lg is flattened
+// on purpose: .shadow-lg is hardcoded on notifications and search facets.
+$box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2) !default;
+$box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !default;
+$box-shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.2) !default;
+$box-shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.075) !default;
+
+// Control heights on Carbon's ladder. With 14px/18px text:
+//   sm  6+18+6 +2px border = 32px      md 10+18+10+2 = 40px (default)
+//   lg 14+18+14+2 = 48px
+// Default is md, not Carbon's 48px lg: a control panel already stacking
+// breadcrumbs, facets and a pager cannot afford 48px rows on a 1080p screen.
+$input-btn-padding-y: o-to-rem(10px) !default;
+$input-btn-padding-x: o-to-rem(15px) !default;
+$input-btn-padding-y-sm: o-to-rem(6px) !default;
+$input-btn-padding-x-sm: o-to-rem(11px) !default;
+$input-btn-padding-y-lg: o-to-rem(14px) !default;
+$input-btn-padding-x-lg: o-to-rem(15px) !default;
+$btn-font-weight: 400 !default;
+
+// Carbon focus is a 2px INSET OUTLINE, never a glow. The outline itself is
+// applied in components/_focus.scss; these kill Bootstrap's box-shadow rings
+// so the two do not stack.
+$input-btn-focus-width: 0 !default;
+$input-btn-focus-box-shadow: none !default;
+$btn-focus-box-shadow: none !default;
+$input-focus-box-shadow: none !default;
+$form-check-input-focus-box-shadow: none !default;
+
+// Carbon's productive heading scale (px: 32/28/20/16/14/14). Headings at and
+// above 20px carry no letter-spacing and stay weight 400.
+$h1-font-size: o-to-rem(32px) !default;
+$h2-font-size: o-to-rem(28px) !default;
+$h3-font-size: o-to-rem(20px) !default;
+$h4-font-size: o-to-rem(16px) !default;
+$h5-font-size: o-to-rem(14px) !default;
+$h6-font-size: o-to-rem(14px) !default;
+$headings-font-weight: 400 !default;
+$headings-line-height: 1.4 !default;
+
+// Carbon checkbox: a near-black box with a white check, not a blue fill.
+$form-check-input-checked-bg-color: $c-icon-primary !default;
+$form-check-input-checked-border-color: $c-icon-primary !default;
+$form-check-input-border: 1px solid $c-icon-primary !default;
+$input-placeholder-color: $c-text-placeholder !default;
+
+// Carbon tooltips are inverse-filled and keep a 2px radius -- one of the very
+// few curved shapes in the system.
+$tooltip-bg: $c-background-inverse !default;
+$tooltip-color: $c-text-inverse !default;
+$tooltip-font-size: o-to-rem(12px) !default;
+$tooltip-border-radius: 2px !default;
+$tooltip-opacity: 1 !default;
+
+$popover-bg: $c-layer-01 !default;
+$popover-border-color: $c-border-subtle !default;
+$popover-border-radius: 0 !default;
+
+$modal-content-bg: $c-layer-01 !default;
+$modal-content-border-color: $c-border-subtle !default;
+$modal-content-border-radius: 0 !default;
+$modal-backdrop-bg: #161616 !default;
+$modal-backdrop-opacity: 0.5 !default;
+
+// Carbon menus sit on layer-02 with no border, only elevation.
+$dropdown-bg: $c-layer-02 !default;
+$dropdown-border-width: 0 !default;
+$dropdown-border-radius: 0 !default;
+$dropdown-link-color: $c-text-secondary !default;
+$dropdown-link-hover-bg: $c-layer-hover-02 !default;
+$dropdown-link-hover-color: $c-text-primary !default;
+$dropdown-link-active-bg: $c-layer-selected-02 !default;
+$dropdown-link-active-color: $c-text-primary !default;
+$dropdown-divider-bg: $c-border-subtle !default;
+
+$nav-tabs-border-width: 0 !default;
+$nav-tabs-link-active-bg: transparent !default;
+$nav-tabs-border-radius: 0 !default;
+
+$card-bg: $c-layer-01 !default;
+$card-border-color: $c-border-subtle !default;
+$list-group-bg: $c-layer-01 !default;
+$list-group-border-color: $c-border-subtle !default;
+
+$table-border-color: $c-border-subtle !default;
+
+$kbd-bg: $c-layer-accent-01 !default;
+$kbd-color: $c-text-primary !default;

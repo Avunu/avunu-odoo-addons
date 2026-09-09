@@ -1,0 +1,155 @@
+// Carbon -> Odoo $o-* bridge (dark / g100).
+//
+// ORDER, and why every assignment here is a HARD assignment:
+//
+//   web.assets_web_dark includes web.assets_web first, so the LIGHT bridge is
+//   already in the list and has already bound every $o-* via !default. Then
+//   web_dark_mode splices its own primary_variables.dark.scss in at the same
+//   anchor -- also all !default, so all of it no-ops behind our light values.
+//   We are spliced last, immediately before web's primary_variables.scss.
+//
+//   A !default in this file would therefore lose to the light bridge and the
+//   entire dark theme would silently not apply. NO !default BELOW THIS LINE.
+//
+// The $c-* tokens have already been rebound to g100 by
+// generated/_carbon_tokens_dark.scss, so most expressions here are identical
+// to the light bridge and simply resolve to different values. The gray ramp is
+// the exception: it has to be reversed, because Odoo treats $o-gray-100 as its
+// lightest step (backgrounds) and $o-gray-900 as its darkest (text), and in a
+// dark theme those roles swap ends of the Carbon ramp.
+
+$o-webclient-color-scheme: dark;
+
+// == Neutral ramp, reversed ==================================================
+// $o-white / $o-black are deliberately NOT inverted. Odoo feeds them to
+// color-contrast() and to Bootstrap's tint-color()/shade-color(); flipping
+// them poisons those and forces inverting the BS functions too (which is
+// exactly what web_dark_mode's bs_functions_overrides.dark.scss already does,
+// and it rides along for free). Remapping the ramp covers the real usage.
+$o-gray-100: $c-gray-100;   // #161616 -- Odoo's "lightest" is now the canvas
+$o-gray-200: $c-gray-90;    // #262626
+$o-gray-300: $c-gray-80;    // #393939
+$o-gray-400: $c-gray-70;    // #525252
+$o-gray-500: $c-gray-60;    // #6f6f6f
+$o-gray-600: $c-gray-50;    // #8d8d8d
+$o-gray-700: $c-gray-40;    // #a8a8a8
+$o-gray-800: $c-gray-30;    // #c6c6c6
+$o-gray-900: $c-gray-10;    // #f4f4f4 -- Odoo's "darkest" is now the text
+
+// == Brand and status (g100 variants) ========================================
+$o-community-color: $c-interactive;      // Blue 50 #4589ff
+$o-enterprise-color: $c-interactive;
+$o-enterprise-action-color: $c-interactive;
+$o-brand-odoo: $c-shell-bg;              // shell is g100 in both themes
+$o-brand-primary: $c-interactive;
+$o-brand-secondary: $c-text-secondary;
+$o-brand-lightsecondary: $c-layer-02;
+$o-action: $c-interactive;
+$o-success: $c-support-success;
+$o-info: $c-support-info;
+$o-warning: $c-support-warning;
+$o-danger: $c-support-error;
+
+// == Text and surfaces =======================================================
+// Still a 6-digit hex: $o-caret-down str-slice()s this one.
+$o-main-text-color: $c-text-primary;     // #f4f4f4
+$o-main-headings-color: $c-text-primary;
+$o-main-link-color: $c-link-primary;     // #78a9ff
+$o-main-code-color: $c-support-error;
+
+$o-view-background-color: $c-layer-01;   // #262626
+$o-form-lightsecondary: $c-border-subtle;
+$o-shadow-color: #000000;
+
+$o-component-active-color: $c-text-primary;
+$o-component-active-bg: $c-layer-selected-01;
+$o-component-active-border: $c-border-interactive;
+$o-list-group-active-color: $c-text-primary;
+$o-list-group-active-bg: $c-layer-selected-01;
+
+// == Fields ==================================================================
+// Same translucency rule as light: monetary fields render a ghost value behind
+// the input, so the fill must never be opaque.
+$o-input-bg: mix($c-field-01, transparent, 60%);
+$o-input-invalid-bg: mix($c-support-error, transparent, 8%);
+$o-input-border-required: $c-border-strong-01;
+
+// == Component tokens ========================================================
+// The navbar is unchanged: Carbon's UI Shell header is g100 in every theme,
+// so it already matches. Repeated here only because these are re-derived from
+// $o-brand-odoo / $o-gray-* by Odoo if left alone.
+$o-navbar-background: $c-shell-bg;
+$o-navbar-border-bottom: 1px solid $c-shell-border;
+$o-navbar-entry-color: $c-shell-text-secondary;
+$o-navbar-entry-color--hover: $c-shell-text;
+$o-navbar-entry-bg--hover: $c-shell-hover;
+$o-navbar-entry-color--active: $c-shell-text;
+$o-navbar-entry-bg--active: $c-shell-active;
+$o-navbar-brand-color: $c-shell-text;
+$o-navbar-badge-bg: $c-support-error;
+
+$o-control-panel-background-color: $c-background;
+$o-control-panel-border-bottom: 1px solid $c-border-subtle;
+
+$o-kanban-background: $c-background;
+
+$o-burger-base-bg: $c-layer-01;
+$o-burger-base-color: $c-text-primary;
+$o-burger-topbar-bg: $c-shell-bg;
+$o-burger-topbar-color: $c-shell-text;
+
+// == Buttons =================================================================
+// Carbon's button tokens differ in g100 (secondary lifts to gray-60, danger
+// brightens), and $c-button-* were rebound by the dark token file.
+$o-btns-bs-override: (
+    "primary": (
+        background: $c-button-primary, border: $c-button-primary, color: $c-text-on-color,
+        hover-background: $c-button-primary-hover, hover-border: $c-button-primary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-primary-active, active-border: $c-button-primary-active, active-color: $c-text-on-color,
+    ),
+    "secondary": (
+        background: $c-layer-01, border: $c-border-strong-01, color: $c-text-primary,
+        hover-background: $c-layer-hover-01, hover-border: $c-border-strong-01, hover-color: $c-text-primary,
+        active-background: $c-layer-selected-01, active-border: $c-border-interactive, active-color: $c-text-primary,
+    ),
+    "dark": (
+        background: $c-button-secondary, border: $c-button-secondary, color: $c-text-on-color,
+        hover-background: $c-button-secondary-hover, hover-border: $c-button-secondary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-secondary-active, active-border: $c-button-secondary-active, active-color: $c-text-on-color,
+    ),
+    "light": (
+        background: transparent, border: transparent, color: $c-link-primary,
+        hover-background: $c-layer-hover-01, hover-border: transparent, hover-color: $c-link-primary,
+        active-background: $c-layer-selected-01, active-border: transparent, active-color: $c-link-primary,
+    ),
+    "danger": (
+        background: $c-button-danger-primary, border: $c-button-danger-primary, color: $c-text-on-color,
+        hover-background: $c-button-danger-hover, hover-border: $c-button-danger-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-danger-active, active-border: $c-button-danger-active, active-color: $c-text-on-color,
+    ),
+);
+
+$o-btns-bs-outline-override: (
+    "primary": (
+        background: transparent, border: $c-button-tertiary, color: $c-button-tertiary,
+        hover-background: $c-button-primary-hover, hover-border: $c-button-primary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-primary-active, active-border: $c-button-primary-active, active-color: $c-text-on-color,
+    ),
+    "secondary": (
+        background: transparent, border: $c-border-subtle, color: $c-text-primary,
+        hover-background: $c-layer-hover-01, hover-border: $c-border-subtle, hover-color: $c-text-primary,
+        active-background: $c-layer-selected-01, active-border: $c-border-interactive, active-color: $c-text-primary,
+    ),
+    "danger": (
+        background: transparent, border: $c-button-danger-primary, color: $c-button-danger-primary,
+        hover-background: $c-button-danger-hover, hover-border: $c-button-danger-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-danger-active, active-border: $c-button-danger-active, active-color: $c-text-on-color,
+    ),
+);
+
+// == web_responsive ==========================================================
+$app-menu-text-color: $c-text-primary;
+$app-menu-background-color: $c-background;
+$app-menu-item-highlight: $c-layer-hover-01;
+$app-menu-box-shadow: inset 0 0 0 1px $c-border-subtle;
+$app-menu-box-shadow-highlight: inset 0 0 0 1px $c-border-strong-01;

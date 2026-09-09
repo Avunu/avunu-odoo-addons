@@ -1,0 +1,27 @@
+// Re-point Odoo's own component-scoped CSS custom properties at Carbon tokens.
+//
+// This is the cheapest layer in the theme: Odoo already funnels these surfaces
+// through custom properties, so we set values rather than fight selectors. No
+// !important, no specificity games -- and it follows the light/dark bundle for
+// free, because every value is a var(--cds-*).
+
+:root {
+    // Carbon's UI Shell palette, exposed to CSS so components/_focus.scss and
+    // the navbar rules can read it. Identical in both themes by design.
+    --cds-shell-focus: #ffffff;
+}
+
+.o_list_renderer {
+    --ListRenderer-thead-bg-color: var(--cds-layer-accent-01);
+    --ListRenderer-thead-border-end-color: var(--carbon-border-subtle);
+    --ListRenderer-tfoot-bg-color: var(--cds-layer-accent-01);
+}
+
+.o_control_panel {
+    --ControlPanel-border-bottom: 1px solid var(--carbon-border-subtle);
+}
+
+.o_kanban_renderer {
+    --Kanban-background: var(--cds-background);
+    --KanbanGroup-background: var(--cds-background);
+}

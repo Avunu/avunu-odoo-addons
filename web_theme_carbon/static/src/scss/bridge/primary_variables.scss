@@ -1,0 +1,252 @@
+// Carbon -> Odoo $o-* bridge (light / g10).
+//
+// Spliced immediately before web/static/src/scss/primary_variables.scss, so it
+// runs AFTER web's functions.scss and utils.scss (o-to-rem(),
+// o-add-unicode-support-font() are both available) and BEFORE every $o-*
+// !default, which is how these win.
+//
+// TWO RULES FOR THIS FILE
+//
+//  1. Every value is a LITERAL. Never `var(--cds-*)`. Odoo runs these through
+//     Sass colour maths -- darken(), mix(), lighten(saturate(adjust-hue())),
+//     invert() -- and $o-caret-down does str-slice(#{$o-main-text-color}, 2) to
+//     build an SVG data-URI. A var() there yields "ar(--cds-text-primary)".
+//
+//  2. Every assignment is `!default`. web.assets_web_print loads
+//     primary_variables_print.scss BEFORE this file, and its values must
+//     survive -- g10's #f4f4f4 canvas is not a printing colour. The dark twin
+//     inverts this rule; see bridge_dark/primary_variables.scss.
+
+// == Type ====================================================================
+// Carbon's productive scale. body-compact-01 (14px/18px) is the ERP workhorse
+// and happens to already be Odoo's base size, so this is mostly line-height.
+$o-root-font-size: 16px !default;
+$o-font-size-base: o-to-rem(14px) !default;          // body-compact-01
+$o-font-size-base-small: o-to-rem(12px) !default;    // label-01
+$o-font-size-base-smaller: o-to-rem(12px) !default;  // helper-text-01
+$o-font-size-base-touch: o-to-rem(16px) !default;    // body-compact-02
+$o-line-height-base: 1.28572 !default;               // 18/14
+$o-line-height-sm: 1.33333 !default;                 // 16/12
+$o-line-height-lg: 1.42857 !default;                 // 20/14
+
+// Carbon caps emphasis at SemiBold; it never uses 700 in product UI.
+$o-font-weight-normal: 400 !default;
+$o-font-weight-medium: 600 !default;
+$o-font-weight-bold: 600 !default;
+
+// Override the RAW stack, not $o-font-family-sans-serif: Odoo's own line then
+// runs o-add-unicode-support-font() over it for us, and $o-headings-font-family
+// inherits Plex automatically.
+$o-system-fonts: ("IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji") !default;
+// Drop Odoo's "SF Pro Display" head: Carbon uses one family throughout and
+// differentiates by weight and size.
+$o-headings-font-family: o-add-unicode-support-font($o-system-fonts) !default;
+$o-font-family-monospace: o-add-unicode-support-font(("IBM Plex Mono",
+    SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace)) !default;
+
+// == Neutral ramp ============================================================
+// The nine highest-leverage lines in the module: Odoo derives borders, muted
+// text, table stripes and dozens of utilities from this ramp. It must stay
+// monotonic because darken()/lighten()/mix() are applied to it.
+$o-white: #ffffff !default;
+$o-black: #000000 !default;
+$o-gray-100: $c-gray-10 !default;
+$o-gray-200: $c-gray-20 !default;
+$o-gray-300: $c-gray-30 !default;
+$o-gray-400: $c-gray-40 !default;
+$o-gray-500: $c-gray-50 !default;
+$o-gray-600: $c-gray-60 !default;
+$o-gray-700: $c-gray-70 !default;
+$o-gray-800: $c-gray-80 !default;
+$o-gray-900: $c-gray-100 !default;
+
+// == Brand and status ========================================================
+$o-community-color: $c-interactive !default;
+$o-enterprise-color: $c-interactive !default;
+$o-enterprise-action-color: $c-interactive !default;
+// The navbar is Carbon's UI Shell header, which is g100-dark in BOTH themes.
+$o-brand-odoo: $c-shell-bg !default;
+$o-brand-primary: $c-interactive !default;
+$o-brand-secondary: $c-text-secondary !default;
+$o-brand-lightsecondary: $c-layer-02 !default;
+$o-action: $c-interactive !default;
+$o-success: $c-support-success !default;
+$o-info: $c-support-info !default;
+$o-warning: $c-support-warning !default;
+$o-danger: $c-support-error !default;
+
+// == Text and surfaces =======================================================
+// $o-main-text-color MUST stay a 6-digit hex: $o-caret-down str-slice()s it.
+$o-main-text-color: $c-text-primary !default;
+$o-main-headings-color: $c-text-primary !default;
+// Set directly rather than letting Odoo darken($o-brand-primary, 5%).
+$o-main-link-color: $c-link-primary !default;
+$o-main-code-color: $c-support-error !default;
+
+$o-view-background-color: $c-layer-01 !default;
+$o-form-lightsecondary: $c-border-subtle !default;
+$o-shadow-color: #000000 !default;
+
+// Bypass Odoo's mix()/lighten(saturate(adjust-hue())) derivations so the
+// selected/active states land on real Carbon tokens.
+$o-component-active-color: $c-text-primary !default;
+$o-component-active-bg: $c-layer-selected-01 !default;
+$o-component-active-border: $c-border-interactive !default;
+$o-list-group-active-color: $c-text-primary !default;
+$o-list-group-active-bg: $c-layer-selected-01 !default;
+
+// == Shape: Carbon v11 is square =============================================
+$o-border-radius: 0 !default;
+$o-border-radius-sm: 0 !default;
+$o-border-radius-lg: 0 !default;
+
+// == Fields ==================================================================
+// Odoo's .o_input already renders Carbon's anatomy -- a bottom rule only, with
+// --o-input-border-color / --o-input-background-color as hooks. It is missing
+// only the fill and the height, both supplied here plus components/_fields.
+//
+// The fill must stay TRANSLUCENT. $o-input-bg is `transparent` by design:
+// monetary fields position a ghost value behind the input, and an opaque fill
+// hides it. web_theme_classic hit the same wall and solved it the same way.
+$o-input-bg: mix($c-field-01, transparent, 60%) !default;
+$o-input-padding-y: 6px !default;   // 6+18+6 + 1px rule ~= 32px, Carbon field `sm`
+$o-input-padding-x: 12px !default;
+$o-input-invalid-bg: mix($c-support-error, transparent, 8%) !default;
+$o-input-border-required: $c-border-strong-01 !default;
+
+// == Density: Carbon's spacing scale =========================================
+$o-spacer: 16px !default;              // spacing-05
+$o-horizontal-padding: 16px !default;
+$o-form-spacing-unit: 4px !default;    // spacing-02
+$o-dropdown-hpadding: 16px !default;
+$o-dropdown-vpadding: 7px !default;    // 7+18+7 = 32px menu items
+$o-table-cell-padding-x-sm: 16px !default;
+$o-table-cell-padding-y-sm: 7px !default;  // 32px list rows
+$o-navbar-height: 48px !default;       // cds--header
+$o-statusbar-height: 40px !default;
+$o-statbutton-height: 40px !default;
+$o-breadcrumb-item-padding-x: 8px !default;
+// Stop scaling labels; components/_form.scss sets label-01 explicitly.
+$o-label-font-size-factor: 1 !default;
+
+// == Buttons =================================================================
+// Odoo does map-merge((its defaults), $o-btns-bs-override), so entries we omit
+// keep Odoo's -- but each entry we DO define must carry all nine states,
+// because bootstrap_review_backend.scss feeds them straight into Bootstrap's
+// button-variant() and a missing key errors the compile.
+//
+// Deliberate deviation: .btn-secondary is mapped to a NEUTRAL OUTLINED control,
+// not Carbon's secondary (a #393939 fill). Odoo uses btn-secondary as the
+// everyday neutral button -- pager, view switcher, cog menu, stat buttons,
+// breadcrumbs -- dozens per screen. A near-black fill on all of them is
+// unusable. Real Carbon secondary stays reachable as .btn-dark.
+$o-btns-bs-override: (
+    "primary": (
+        background: $c-button-primary, border: $c-button-primary, color: $c-text-on-color,
+        hover-background: $c-button-primary-hover, hover-border: $c-button-primary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-primary-active, active-border: $c-button-primary-active, active-color: $c-text-on-color,
+    ),
+    "secondary": (
+        background: $c-layer-01, border: $c-border-strong-01, color: $c-text-primary,
+        hover-background: $c-layer-hover-01, hover-border: $c-border-strong-01, hover-color: $c-text-primary,
+        active-background: $c-layer-selected-01, active-border: $c-border-interactive, active-color: $c-text-primary,
+    ),
+    "dark": (
+        background: $c-button-secondary, border: $c-button-secondary, color: $c-text-on-color,
+        hover-background: $c-button-secondary-hover, hover-border: $c-button-secondary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-secondary-active, active-border: $c-button-secondary-active, active-color: $c-text-on-color,
+    ),
+    "light": (
+        background: transparent, border: transparent, color: $c-link-primary,
+        hover-background: $c-layer-hover-01, hover-border: transparent, hover-color: $c-link-primary,
+        active-background: $c-layer-selected-01, active-border: transparent, active-color: $c-link-primary,
+    ),
+    "danger": (
+        background: $c-button-danger-primary, border: $c-button-danger-primary, color: $c-text-on-color,
+        hover-background: $c-button-danger-hover, hover-border: $c-button-danger-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-danger-active, active-border: $c-button-danger-active, active-color: $c-text-on-color,
+    ),
+) !default;
+
+$o-btns-bs-outline-override: (
+    // cds--btn--tertiary
+    "primary": (
+        background: transparent, border: $c-button-tertiary, color: $c-button-tertiary,
+        hover-background: $c-button-primary-hover, hover-border: $c-button-primary-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-primary-active, active-border: $c-button-primary-active, active-color: $c-text-on-color,
+    ),
+    // Read at compile time by dropdown.scss, button_box.scss and
+    // statusbar_field.scss, so getting it right themes those for free.
+    "secondary": (
+        background: transparent, border: $c-border-subtle, color: $c-text-primary,
+        hover-background: $c-layer-hover-01, hover-border: $c-border-subtle, hover-color: $c-text-primary,
+        active-background: $c-layer-selected-01, active-border: $c-border-interactive, active-color: $c-text-primary,
+    ),
+    "danger": (
+        background: transparent, border: $c-button-danger-primary, color: $c-button-danger-primary,
+        hover-background: $c-button-danger-hover, hover-border: $c-button-danger-hover, hover-color: $c-text-on-color,
+        active-background: $c-button-danger-active, active-border: $c-button-danger-active, active-color: $c-text-on-color,
+    ),
+) !default;
+
+// == Component tokens (web/static/src/**/*.variables.scss, all !default) ======
+// -- navbar: Carbon UI Shell header, dark in both themes
+$o-navbar-padding-v: 0 !default;
+$o-navbar-font-size: o-to-rem(14px) !default;
+$o-navbar-background: $c-shell-bg !default;
+$o-navbar-border-bottom: 1px solid $c-shell-border !default;
+$o-navbar-entry-margin-h: 0 !default;
+$o-navbar-entry-padding-h: 16px !default;
+$o-navbar-entry-border-radius: 0 !default;
+$o-navbar-entry-color: $c-shell-text-secondary !default;
+$o-navbar-entry-color--hover: $c-shell-text !default;
+$o-navbar-entry-bg--hover: $c-shell-hover !default;
+$o-navbar-entry-color--active: $c-shell-text !default;
+$o-navbar-entry-bg--active: $c-shell-active !default;
+$o-navbar-brand-font-size: 1em !default;
+$o-navbar-brand-color: $c-shell-text !default;
+$o-navbar-badge-size: 10px !default;
+$o-navbar-badge-padding: 3px !default;
+$o-navbar-badge-bg: $c-support-error !default;
+$o-navbar-badge-color: #ffffff !default;
+$o-navbar-badge-text-shadow: none !default;
+
+// -- control panel
+$o-control-panel-background-color: $c-background !default;
+$o-control-panel-border-bottom: 1px solid $c-border-subtle !default;
+
+// -- form
+$o-sheet-vpadding: 32px !default;
+$o-form-picture-size: 96px !default;
+
+// -- kanban: Carbon tiles on the page canvas
+$o-kanban-background: $c-background !default;
+$o-kanban-inside-vgutter: 16px !default;
+$o-kanban-inside-hgutter: 16px !default;
+$o-kanban-record-margin: 8px !default;
+$o-kanban-group-padding: 16px !default;
+
+// -- notification: Carbon's notification rule is 3px
+$o-notification-margin: 16px !default;
+$o-notification-max-width-sm: 384px !default;
+$o-notification-bar-width: 3px !default;
+
+// -- burger menu (mobile)
+$o-burger-base-bg: $c-layer-01 !default;
+$o-burger-base-color: $c-text-primary !default;
+$o-burger-topbar-bg: $c-shell-bg !default;
+$o-burger-topbar-color: $c-shell-text !default;
+
+// == web_responsive ==========================================================
+// All !default in web_responsive/static/src/legacy/scss/primary_variable.scss,
+// so we win by loading EARLIER -- no ('after', 'web_responsive/...') anchor
+// into its internals, which is what breaks silently when a file moves.
+$app-menu-text-color: $c-text-primary !default;
+$app-menu-background-color: $c-background !default;
+$app-menu-item-highlight: $c-layer-hover-01 !default;
+// Carbon tiles carry a border, not a glow.
+$app-menu-box-shadow: inset 0 0 0 1px $c-border-subtle !default;
+$app-menu-box-shadow-highlight: inset 0 0 0 1px $c-border-strong-01 !default;

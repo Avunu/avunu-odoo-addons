@@ -1,0 +1,54 @@
+// Carbon -> Bootstrap bridge (dark / g100).
+//
+// Same position and purpose as bridge/late.scss, and the same NO-!default rule
+// as bridge_dark/primary_variables.scss: the light twin has already bound all
+// of these, so anything !default here is a silent no-op.
+//
+// The Odoo non-!default variables ($o-search-panel-width, the statusbar caret,
+// the form max-widths) are geometry, not colour, so they are set once in the
+// light file and deliberately not repeated here.
+
+$border-color: $c-border-subtle;
+
+// Hard-assigned in the light twin (secondary_variables.scss derives it as
+// invert($o-view-background-color, 10%), which is useless here), so it does
+// NOT carry over: without this line dark forms keep the light #e0e0e0 rule.
+$o-form-separator-color: $c-border-subtle;
+
+// Carbon's dark elevation is heavier: shadows must read against #161616.
+$box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+$box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+$box-shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.6);
+
+$form-check-input-checked-bg-color: $c-icon-primary;
+$form-check-input-checked-border-color: $c-icon-primary;
+$form-check-input-border: 1px solid $c-icon-primary;
+$input-placeholder-color: $c-text-placeholder;
+
+// In g100 the inverse pair flips: an inverse tooltip is LIGHT on dark.
+$tooltip-bg: $c-background-inverse;
+$tooltip-color: $c-text-inverse;
+
+$popover-bg: $c-layer-01;
+$popover-border-color: $c-border-subtle;
+
+$modal-content-bg: $c-layer-01;
+$modal-content-border-color: $c-border-subtle;
+$modal-backdrop-bg: #000000;
+$modal-backdrop-opacity: 0.65;
+
+$dropdown-bg: $c-layer-02;
+$dropdown-link-color: $c-text-secondary;
+$dropdown-link-hover-bg: $c-layer-hover-02;
+$dropdown-link-hover-color: $c-text-primary;
+$dropdown-link-active-bg: $c-layer-selected-02;
+$dropdown-link-active-color: $c-text-primary;
+$dropdown-divider-bg: $c-border-subtle;
+
+$card-bg: $c-layer-01;
+$card-border-color: $c-border-subtle;
+$list-group-bg: $c-layer-01;
+$list-group-border-color: $c-border-subtle;
+$table-border-color: $c-border-subtle;
+$kbd-bg: $c-layer-accent-01;
+$kbd-color: $c-text-primary;

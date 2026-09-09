@@ -1,0 +1,48 @@
+// Carbon focus.
+//
+// Ships in the same change as the bridge's $input-btn-focus-box-shadow: none.
+// Bootstrap's focus affordance is a soft box-shadow glow; Carbon's is a hard
+// 2px outline drawn INSIDE the control (outline-offset: -2px) so it never
+// changes layout and never bleeds past a table cell. Removing one without
+// adding the other would leave keyboard users with no focus indicator at all.
+//
+// :focus-visible, not :focus -- Carbon shows the ring for keyboard traversal,
+// not for pointer clicks.
+
+$o-carbon-focus-width: 2px !default;
+
+%o-carbon-focus-ring {
+    outline: $o-carbon-focus-width solid var(--cds-focus);
+    outline-offset: -#{$o-carbon-focus-width};
+    // Some Odoo/Bootstrap rules re-assert a glow at higher specificity.
+    box-shadow: none;
+}
+
+.o_web_client,
+.modal,
+.o_popover,
+.o-dropdown--menu {
+    .btn:focus-visible,
+    .o_input:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    .form-check-input:focus-visible,
+    .dropdown-item:focus-visible,
+    .nav-link:focus-visible,
+    a:focus-visible,
+    [tabindex]:focus-visible {
+        @extend %o-carbon-focus-ring;
+    }
+}
+
+// The navbar is Carbon's UI Shell, which is dark in BOTH themes. --cds-focus
+// is #0f62fe under g10 and would be nearly invisible on #161616, so the shell
+// uses Carbon's own inverse focus colour instead.
+.o_main_navbar {
+    :focus-visible {
+        outline: $o-carbon-focus-width solid var(--cds-shell-focus, #ffffff);
+        outline-offset: -#{$o-carbon-focus-width};
+        box-shadow: none;
+    }
+}
