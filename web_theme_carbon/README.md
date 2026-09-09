@@ -61,9 +61,23 @@ npm install --ignore-scripts        # IBM_TELEMETRY_DISABLED=true in CI
 npm run codegen                     # regenerate everything
 npm run audit                       # drift guard, warn-only
 npm run check                       # codegen --check + audit --strict   <- CI
+
+odoo -u web_theme_carbon --test-enable --stop-after-init   # cascade tests
 ```
 
 `npm run check` regenerates in memory and byte-compares, so it fails when the committed output is stale without touching the tree.
+
+## What is styled
+
+Bridge (variables only, no bespoke CSS): palette, gray ramp, IBM Plex type scale,
+square corners, the full `$o-btns-bs-override` button hierarchy, navbar, control
+panel, kanban, notification and burger tokens, and web_responsive's `$app-menu-*`.
+
+Components: list view (`cds--data-table`), fields, form sheet, statusbar
+(`cds--content-switcher`), notebook (`cds--tabs`), stat buttons, navbar
+(`cds--header`), control panel, search bar and panel, apps grid, dialogs
+(`cds--modal`), dropdowns (`cds--menu`), notifications, tags (`cds--tag`) and
+kanban records (`cds--tile`).
 
 ## The drift guard
 
@@ -79,6 +93,11 @@ Every check in `tools/audit.mjs` guards a failure that is **silent** — the the
 8.  `web_responsive`'s `$app-menu-*` are still `!default` (we win by loading earlier, which only works while they are)
 
 Point 7 is the sharp one: an anchor that stops resolving does not degrade gracefully. `AssetPaths.index()` raises `ValueError` and every backend page 500s.
+
+Cascade conflicts are checked separately, in `tests/test_cascade.py`, because
+deciding them honestly needs the compiled bundle: Odoo marks declarations
+`!important` from inside mixins, so a static SCSS scan produced false alarms that
+the compiled bundle disproved, and a guard that cries wolf gets ignored.
 
 ## Scope
 
