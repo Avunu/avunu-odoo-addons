@@ -1,0 +1,111 @@
+// List view -> Carbon data table (cds--data-table, `sm` density).
+//
+// The highest-value surface in an ERP, and almost all of it is reachable
+// through custom properties Odoo already declares, so there is very little
+// selector fighting here and no !important.
+//
+// Row height is NOT set here. The bridge sets $o-table-cell-padding-y-sm: 7px,
+// which Odoo maps to Bootstrap's $table-cell-padding-y-sm, and 7 + 18 + 7 with
+// body-compact-01's 18px line box already lands on Carbon's 32px `sm` step.
+// Setting an explicit height on top of that would only fight it.
+
+.o_list_renderer {
+    // Carbon puts a data table on a layer and its header on layer-accent.
+    // Odoo's defaults are the page canvas and $o-gray-200.
+    --ListRenderer-thead-bg-color: var(--cds-layer-accent-01);
+    --ListRenderer-thead-bg-active-color: var(--cds-layer-selected-01);
+    --ListRenderer-thead-border-end-color: var(--carbon-border-subtle);
+    --ListRenderer-tfoot-bg-color: var(--cds-layer-accent-01);
+
+    .o_list_table {
+        --table-bg: var(--cds-layer-01);
+        --table-hover-bg: var(--cds-layer-hover-01);
+        // Carbon's data table is not zebra-striped: rows are separated by a
+        // hairline instead. Odoo puts `table-striped` on every ungrouped list,
+        // so the stripe is neutralised rather than restyled.
+        --table-striped-bg: transparent;
+        --table-striped-color: var(--cds-text-secondary);
+
+        // -- header: heading-compact-01 (14px / 600) ------------------------
+        > thead > tr > th {
+            vertical-align: middle;
+            border-bottom: 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.28572;
+            letter-spacing: 0.16px;
+            color: var(--cds-text-primary);
+        }
+
+        // v18 calls it o_list_sortable_caret, v19 renamed it to
+        // o_list_sortable_icon. Both are listed so the port needs no edit.
+        .o_list_sortable_caret,
+        .o_list_sortable_icon {
+            color: var(--cds-icon-primary);
+            background: transparent;
+        }
+
+        // -- body: body-compact-01 (14px / 400) in secondary text -----------
+        > tbody > tr.o_data_row {
+            > td {
+                vertical-align: middle;
+                font-size: 0.875rem;
+                line-height: 1.28572;
+                letter-spacing: 0.16px;
+                color: var(--cds-text-secondary);
+                border-bottom: 1px solid var(--carbon-border-subtle);
+            }
+
+            &.o_data_row_selected > * {
+                --table-accent-bg: var(--cds-layer-selected-01);
+            }
+        }
+
+        // -- group headers --------------------------------------------------
+        > tbody > tr.o_group_header {
+            --table-bg: var(--cds-layer-accent-01);
+
+            > th,
+            > td {
+                color: var(--cds-text-primary);
+                font-weight: 600;
+                border-bottom: 1px solid var(--carbon-border-subtle);
+            }
+        }
+
+        // -- footer / aggregates --------------------------------------------
+        > tfoot > tr > td {
+            color: var(--cds-text-primary);
+            font-weight: 600;
+            border-top: 1px solid var(--carbon-border-subtle);
+        }
+
+        // Odoo fakes depth with an inset shadow under the first row. Carbon
+        // separates with the hairline and nothing else.
+        > tbody:first-of-type > tr:first-child:not(.o_group_header) {
+            box-shadow: none;
+        }
+    }
+
+    // -- inline edit ---------------------------------------------------------
+    // Odoo already strips the field's own border and background inside a
+    // selected row (list_renderer.scss sets --o-input-background-color:
+    // initial there), which is also what Carbon does: a grid of filled boxes
+    // reads as noise. So the field treatment moves UP to the cell.
+    .o_data_row.o_selected_row > .o_data_cell {
+        background-color: var(--cds-field-01);
+        box-shadow: inset 0 -1px 0 0 var(--cds-border-strong-01);
+    }
+
+    .o_data_row.o_selected_row > .o_data_cell:focus-within {
+        // Carbon's focus is a 2px inset outline, never a glow.
+        outline: 2px solid var(--cds-focus);
+        outline-offset: -2px;
+        box-shadow: none;
+    }
+
+    .o_data_row.o_selected_row > .o_data_cell.o_invalid_cell {
+        background-color: var(--cds-field-01);
+        box-shadow: inset 0 -1px 0 0 var(--cds-support-error);
+    }
+}
