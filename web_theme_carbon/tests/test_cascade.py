@@ -33,6 +33,11 @@ class TestCarbonCascade(TransactionCase):
         ("web.assets_backend", "o_last_breadcrumb_item", "font-size", "1.25rem"),
         ("web.assets_backend", "o_notification", "background-color", "--cds-"),
         ("web.assets_web_dark", "o_kanban_record", "background-color", "--cds-"),
+        # Bootstrap generates text-bg-* as a UTILITY, so it is !important and
+        # neither specificity nor load order can beat it -- our rule has to
+        # match !important, and this proves it still does.
+        ("web.assets_backend", "text-bg-success", "background-color", "tag-background-green"),
+        ("web.assets_web_dark", "text-bg-success", "background-color", "tag-background-green"),
     ]
 
     def _bundle_css(self, name):

@@ -76,8 +76,8 @@ panel, kanban, notification and burger tokens, and web_responsive's `$app-menu-*
 Components: list view (`cds--data-table`), fields, form sheet, statusbar
 (`cds--content-switcher`), notebook (`cds--tabs`), stat buttons, navbar
 (`cds--header`), control panel, search bar and panel, apps grid, dialogs
-(`cds--modal`), dropdowns (`cds--menu`), notifications, tags (`cds--tag`) and
-kanban records (`cds--tile`).
+(`cds--modal`), dropdowns (`cds--menu`), notifications, tags and status badges
+(`cds--tag`) and kanban records (`cds--tile`).
 
 ## The drift guard
 

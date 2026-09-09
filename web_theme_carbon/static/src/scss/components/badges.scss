@@ -1,0 +1,47 @@
+// Status badges -> Carbon tag colour pairs.
+//
+// Odoo renders a badge field as
+//   <div class="o_field_widget o_field_badge text-success">
+//     <span class="badge rounded-pill text-bg-success">Confirmed</span>
+//
+// The colour is already Carbon -- the bridge points $o-success at
+// support-success, so the fill lands on #24a148 -- but the SHAPE is not.
+// Bootstrap's text-bg-* is a solid saturated fill with white text, whereas a
+// Carbon tag is a light background with dark text of the same hue
+// (green: #a7f0ba on #0e6027). That is the difference this file closes.
+//
+// WHY !important HERE, when the rest of the theme avoids it:
+// text-bg-* is a Bootstrap UTILITY, and utilities are generated with
+// !important whenever $enable-important-utilities is true, which it is
+// (bootstrap/scss/_variables.scss:385). Specificity cannot beat it and load
+// order cannot either. Overriding a utility is the one case where matching
+// !important is correct rather than lazy -- the tag colours next door solve
+// their own !important problem differently, by setting the custom property
+// Odoo's rule reads, because there the !important came from Odoo's own
+// component CSS rather than from a utility.
+//
+// Scoped to .o_field_badge so it does not touch badges that are SUPPOSED to be
+// a solid dot -- the mail counter, for one, which is correctly a filled
+// support-error circle.
+
+.o_field_badge > .badge {
+    // label-01, and Carbon tags are regular weight, not medium.
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.32px;
+    // Tags keep their pill: one of Carbon's few deliberately round shapes.
+    border-radius: 50rem;
+}
+
+@each $-bs, $-carbon in ("primary": "blue", "secondary": "gray", "success": "green",
+                         "danger": "red", "info": "cyan", "dark": "cool-gray",
+                         "light": "gray", "warning": "yellow") {
+    .o_field_badge > .badge.text-bg-#{$-bs} {
+        // warning maps to Carbon's yellow, which is not a Carbon TAG colour --
+        // it comes from the --carbon-* aliases the codegen emits per theme.
+        $-ns: if($-carbon == "yellow" or $-carbon == "orange", "carbon", "cds");
+
+        background-color: var(--#{$-ns}-tag-background-#{$-carbon}) !important;
+        color: var(--#{$-ns}-tag-color-#{$-carbon}) !important;
+    }
+}
