@@ -1,0 +1,78 @@
+// Fields -> Carbon text input.
+//
+// Odoo 18 already ships Carbon's field anatomy: views/fields/fields.scss gives
+// .o_input `border-width: 0 0 1px 0` -- a bottom rule only -- and exposes both
+// --o-input-border-color and --o-input-background-color. So this is almost
+// entirely a matter of pointing those at Carbon tokens; there is no specificity
+// fight and nothing here needs !important.
+//
+// The FILL stays translucent (the bridge mixes it with transparent). $o-input-bg
+// is `transparent` in stock Odoo by design: monetary fields position a ghost
+// value behind the input to size it, and an opaque fill hides it.
+
+:root {
+    --o-input-border-color: var(--cds-border-strong-01);
+}
+
+.o_field_widget:focus-within {
+    --o-input-border-color: var(--cds-focus);
+}
+
+.o_field_invalid {
+    --o-input-border-color: var(--cds-support-error);
+}
+
+.o_required_modifier {
+    --o-input-border-color: var(--cds-border-strong-01);
+}
+
+// Carbon's layering contract: a field sits one layer BELOW its container. On a
+// layer-01 sheet a field-01 fill would be the same white as the sheet and the
+// input would vanish, so anything on a layer steps its fields to field-02.
+.o_form_sheet,
+.o_form_nosheet,
+.modal-content,
+.o-dropdown--menu,
+.o_popover {
+    --o-input-background-color: var(--cds-field-02);
+}
+
+.o_form_view {
+    .o_input {
+        color: var(--cds-text-primary);
+
+        &::placeholder {
+            color: var(--cds-text-placeholder);
+        }
+
+        // Carbon's focus is a 2px inset outline, not a glow. The bridge already
+        // zeroed Bootstrap's focus box-shadows so the two cannot stack.
+        &:focus,
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+
+        &:disabled {
+            color: var(--cds-text-disabled);
+            border-bottom-color: transparent;
+        }
+    }
+}
+
+// Carbon's checkbox is a 16px near-black box with a white check, not a blue
+// fill. The colours come from the bridge; this is the size and the shape.
+.form-check-input {
+    border-radius: 0;
+
+    &:focus-visible {
+        outline: 2px solid var(--cds-focus);
+        outline-offset: 1px;
+        box-shadow: none;
+    }
+}
+
+// The toggle is one of Carbon's round shapes, so it keeps its pill radius.
+.form-switch .form-check-input {
+    border-radius: 50rem;
+}

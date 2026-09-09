@@ -1,0 +1,43 @@
+// Statusbar -> Carbon content switcher.
+//
+// Odoo draws the statusbar's chevrons with a clip-path polygon whose points are
+// all derived from --o-statusbar-caret-width. The bridge sets
+// $o-statusbar-arrow-width: 0, which collapses that polygon into a plain
+// rectangle -- a content switcher -- without touching the markup.
+//
+// THE CATCH: statusbar_field.scss also derives the horizontal padding from the
+// same variable
+//
+//     --o-statusbar-padding-x: calc(var(--o-statusbar-caret-width) * 1.25);
+//
+// so zeroing the caret also zeroes the padding and the segments collapse onto
+// their own text. The padding therefore has to be restated here.
+//
+// The hover/active colours are NOT set here: statusbar_field.scss reads them
+// out of $o-btns-bs-override."secondary" at compile time, so the bridge's
+// button map has already themed them.
+
+.o_field_statusbar > .o_statusbar_status {
+    // Carbon content switcher: 16px inset. The 1.375 factor is Odoo's own
+    // multiplier on this variable, so the effective inset is ~16px.
+    --o-statusbar-padding-x: 11.6px;
+    --o-statusbar-radius: 0;
+    --o-statusbar-border: var(--carbon-border-subtle);
+
+    > .o_arrow_button {
+        font-size: 0.875rem;
+        font-weight: 400;
+        letter-spacing: 0.16px;
+        color: var(--cds-text-secondary);
+
+        &.o_arrow_button_current {
+            font-weight: 600;
+            color: var(--cds-text-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+    }
+}

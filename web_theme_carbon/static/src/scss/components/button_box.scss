@@ -1,0 +1,26 @@
+// Stat buttons -> a Carbon tile strip.
+//
+// --button-box-border-color is read from $o-btns-bs-outline-override."secondary"
+// at compile time, so the bridge has already pointed it at Carbon's hairline.
+
+.o-form-buttonbox {
+    .oe_stat_button {
+        border-radius: 0;
+        color: var(--cds-text-primary);
+
+        .o_button_icon,
+        .fa, .oi {
+            color: var(--cds-icon-secondary);
+        }
+
+        // Carbon tiles change layer on hover rather than tinting.
+        &:hover {
+            background-color: var(--cds-layer-hover-01);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+    }
+}

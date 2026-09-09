@@ -1,0 +1,30 @@
+// Notebook -> Carbon tabs (line variant).
+//
+// Odoo exposes the whole tab underline through custom properties, so this is a
+// four-line change plus typography.
+
+.o_notebook {
+    --notebook-link-border-color: var(--carbon-border-subtle);
+    --notebook-link-border-color-hover: var(--cds-border-strong-01);
+    --notebook-link-border-color-active: var(--cds-border-interactive);
+    --notebook-link-border-color-active-accent: var(--cds-border-interactive);
+
+    .o_notebook_headers .nav-link {
+        border-radius: 0;
+        font-size: 0.875rem;
+        letter-spacing: 0.16px;
+        color: var(--cds-text-secondary);
+
+        &.active {
+            // Carbon marks the selected tab with weight, not a filled block.
+            font-weight: 600;
+            color: var(--cds-text-primary);
+            background-color: transparent;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+    }
+}

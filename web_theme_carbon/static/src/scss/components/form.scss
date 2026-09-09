@@ -1,0 +1,35 @@
+// Form view -> Carbon form layout on a tile.
+
+.o_form_view {
+    // Carbon labels are label-01: 12px / 400 / 0.32px tracking, in secondary
+    // text. The bridge sets $o-label-font-size-factor: 1 so Odoo stops scaling
+    // them and this size is the one that applies.
+    .o_form_label {
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.32px;
+        color: var(--cds-text-secondary);
+    }
+
+    // The sheet is a Carbon tile: layer-01, square, hairline border, and no
+    // shadow -- Carbon separates with borders, not elevation.
+    .o_form_sheet {
+        background-color: var(--cds-layer-01);
+        border: 1px solid var(--carbon-border-subtle);
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .o_form_sheet_bg {
+        background-color: var(--cds-background);
+    }
+
+    // Group separators: heading-compact-01 above a hairline.
+    .o_horizontal_separator {
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.16px;
+        color: var(--cds-text-primary);
+        border-bottom: 1px solid var(--carbon-border-subtle);
+    }
+}
