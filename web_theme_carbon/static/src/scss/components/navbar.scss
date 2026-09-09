@@ -1,0 +1,39 @@
+// Navbar -> Carbon UI Shell header (cds--header).
+//
+// Most of this arrives through the bridge: navbar.variables.scss is entirely
+// !default, so $o-navbar-background, the entry colours and the 48px height are
+// already Carbon before any rule here runs. What is left is the parts Carbon
+// expresses as structure rather than colour.
+//
+// The shell is g100 in BOTH themes -- a Carbon product header stays dark on a
+// white page -- so these values are theme-invariant and read from the shell
+// tokens rather than from --cds-*, which would flip.
+
+.o_main_navbar {
+    // Carbon's header sits flush; Odoo's default is a 1px bottom border, which
+    // the bridge already points at the shell border.
+    font-size: 0.875rem;
+    letter-spacing: 0.16px;
+
+    // Carbon marks the current header item with a 3px inset rule at the bottom
+    // and lifts the label to full-strength text.
+    .o_nav_entry.active,
+    .o_menu_sections .o_nav_entry:active,
+    .dropdown-toggle.show {
+        box-shadow: inset 0 -3px 0 0 var(--cds-border-interactive);
+        color: var(--cds-shell-text, #f4f4f4);
+    }
+
+    // heading-compact-01: the product name is the one semibold thing up here.
+    .o_menu_brand {
+        font-weight: 600;
+        letter-spacing: 0.16px;
+    }
+
+    // Carbon's systray icons are 20px on a 48px bar.
+    .o_menu_systray {
+        .fa, .oi {
+            font-size: 1.125rem;
+        }
+    }
+}

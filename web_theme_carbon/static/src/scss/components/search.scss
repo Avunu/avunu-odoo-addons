@@ -1,0 +1,71 @@
+// Search bar, facets and search panel.
+//
+// Facets map to cds--tag--filter, which is one of Carbon's few deliberately
+// ROUND shapes -- the bridge keeps $border-radius-pill for exactly this.
+// The search panel maps to the UI Shell side nav.
+
+.o_control_panel .o_searchview {
+    font-size: 0.875rem;
+    letter-spacing: 0.16px;
+
+    .o_searchview_input {
+        color: var(--cds-text-primary);
+
+        &::placeholder {
+            color: var(--cds-text-placeholder);
+        }
+    }
+
+    .o_searchview_icon {
+        color: var(--cds-icon-secondary);
+    }
+
+    // -- facets -> cds--tag--filter -----------------------------------------
+    .o_searchview_facet {
+        background-color: var(--cds-layer-accent-01);
+        border-radius: 50rem;
+        color: var(--cds-text-primary);
+        font-size: 0.75rem;          // label-01
+        letter-spacing: 0.32px;
+
+        .o_facet_value,
+        .o_searchview_facet_label {
+            color: inherit;
+        }
+
+        // Carbon's filter tag hover darkens the whole chip, and its dismiss
+        // affordance is a square hit area inside the pill.
+        &:hover {
+            background-color: var(--cds-layer-selected-01);
+        }
+    }
+}
+
+// -- search panel -> cds--side-nav ------------------------------------------
+.o_search_panel {
+    background-color: var(--cds-background);
+    border-right: 1px solid var(--carbon-border-subtle);
+    font-size: 0.875rem;
+    letter-spacing: 0.16px;
+
+    .o_search_panel_section_header,
+    .o_search_panel_label_title {
+        color: var(--cds-text-secondary);
+    }
+
+    .o_search_panel_section {
+        border-bottom: 1px solid var(--carbon-border-subtle);
+    }
+
+    // Carbon's side nav marks the current item with a 3px rule on the leading
+    // edge and lifts it onto the selected layer.
+    .active {
+        background-color: var(--cds-layer-selected-01);
+        box-shadow: inset 3px 0 0 0 var(--cds-border-interactive);
+        color: var(--cds-text-primary);
+    }
+
+    .o_search_panel_counter {
+        color: var(--cds-text-secondary);
+    }
+}

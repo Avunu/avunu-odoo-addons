@@ -1,0 +1,57 @@
+// Control panel -> Carbon breadcrumb + content switcher + pagination.
+//
+// The panel's own background and bottom rule come from the bridge
+// (control_panel.variables.scss is !default). These are the component shapes.
+
+.o_control_panel {
+    // -- breadcrumb ---------------------------------------------------------
+    // Carbon breadcrumb links are underlined link-primary; the current item is
+    // plain text, not a link, and carries the page title weight.
+    .o_breadcrumb {
+        .breadcrumb-item > a,
+        a.o_back_button {
+            color: var(--cds-link-primary);
+            text-decoration: underline;
+
+            &:hover {
+                color: var(--cds-link-primary-hover);
+            }
+        }
+
+        // heading-03 (20px / 400 / no tracking) -- Carbon drops letter-spacing
+        // at and above 20px.
+        .o_last_breadcrumb_item {
+            font-size: 1.25rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            color: var(--cds-text-primary);
+        }
+    }
+
+    // -- view switcher -> cds--content-switcher ------------------------------
+    // Carbon joins the segments into one bar with a shared hairline and no
+    // gaps; the selected segment inverts rather than tinting.
+    .o_cp_switch_buttons {
+        .btn {
+            border-radius: 0;
+
+            &.active,
+            &.o_switch_view.active {
+                background-color: var(--cds-layer-selected-01);
+                border-color: var(--cds-border-interactive);
+                color: var(--cds-text-primary);
+            }
+        }
+    }
+
+    // -- pager -> cds--pagination -------------------------------------------
+    .o_cp_pager {
+        font-size: 0.875rem;
+        letter-spacing: 0.16px;
+        color: var(--cds-text-secondary);
+
+        .o_pager_counter {
+            color: var(--cds-text-secondary);
+        }
+    }
+}

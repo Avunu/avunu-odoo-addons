@@ -1,0 +1,37 @@
+// web_responsive's apps grid -> Carbon clickable tiles (cds--tile--clickable).
+//
+// The colours arrive through the bridge: web_responsive declares every
+// $app-menu-* with !default, so loading earlier is enough and no anchor into
+// its internal file layout is needed. What is left is shape and motion.
+//
+// web_responsive raises specificity and uses !important on its hover, so the
+// two rules that have to beat it say so explicitly rather than by accident.
+
+.o_grid_apps_menu {
+    background-color: var(--cds-background);
+
+    .o-app-menu-item {
+        border-radius: 0;
+        color: var(--cds-text-primary);
+        // Carbon tiles do not move on hover; they change layer. web_responsive
+        // animates a translateY, which reads as a different design language.
+        transform: none !important;
+        transition: background-color 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+
+        &:hover,
+        &:focus {
+            background-color: var(--cds-layer-hover-01) !important;
+            transform: none !important;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+    }
+
+    .o_grid_apps_menu__button {
+        border-radius: 0;
+        color: var(--cds-shell-text, #f4f4f4);
+    }
+}
