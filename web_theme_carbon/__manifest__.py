@@ -63,6 +63,11 @@
             "web_theme_carbon/static/src/scss/generated/_carbon_fonts.scss",
             "web_theme_carbon/static/lib/carbon/carbon.g10.css",
             "web_theme_carbon/static/src/scss/components/*.scss",
+            # Behaviour, not just styling. Two Carbon patterns Odoo has no
+            # equivalent for: the UI Shell's global search (which opens Odoo's
+            # own command palette) and the data-table toolbar search.
+            "web_theme_carbon/static/src/js/**/*.js",
+            "web_theme_carbon/static/src/js/**/*.xml",
         ],
         # graph/pivot re-include _assets_helpers, so they get their own
         # variable pass; without this they stay Odoo-purple.

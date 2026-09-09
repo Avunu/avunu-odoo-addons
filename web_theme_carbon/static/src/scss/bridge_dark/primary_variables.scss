@@ -58,6 +58,13 @@ $o-main-link-color: $c-link-primary;     // #78a9ff
 $o-main-code-color: $c-support-error;
 
 $o-view-background-color: $c-layer-01;   // #262626
+// Set explicitly, not left to secondary_variables.scss to derive from
+// $o-gray-100. web_dark_mode's primary_variables.dark.scss is spliced in
+// BEFORE this file and does `$o-webclient-background-color: $o-gray-100
+// !default` -- at which point $o-gray-100 is still the LIGHT bridge's value,
+// so the canvas binds to #f4f4f4 permanently and the whole page stays light
+// behind an otherwise-dark UI. Restating it here is the only thing that wins.
+$o-webclient-background-color: $c-background;
 $o-form-lightsecondary: $c-border-subtle;
 $o-shadow-color: #000000;
 

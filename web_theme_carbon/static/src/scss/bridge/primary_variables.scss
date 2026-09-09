@@ -87,6 +87,8 @@ $o-main-link-color: $c-link-primary !default;
 $o-main-code-color: $c-support-error !default;
 
 $o-view-background-color: $c-layer-01 !default;
+// Stated rather than derived, to mirror the dark twin (see the note there).
+$o-webclient-background-color: $c-background !default;
 $o-form-lightsecondary: $c-border-subtle !default;
 $o-shadow-color: #000000 !default;
 

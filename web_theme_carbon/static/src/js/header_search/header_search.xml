@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!--
+        Deliberately shaped like the surrounding systray buttons rather than
+        like a Carbon header action: it has to sit in Odoo's systray row, and
+        matching its neighbours matters more than matching Carbon's markup.
+        The Carbon treatment is applied in components/header_search.scss.
+    -->
+    <t t-name="web_theme_carbon.HeaderSearch">
+        <button
+            type="button"
+            class="o_carbon_header_search o_nav_entry btn border-0"
+            t-att-title="title"
+            t-att-aria-label="title"
+            t-on-click="onClick"
+        >
+            <i class="oi oi-search" role="img" aria-hidden="true" />
+        </button>
+    </t>
+</templates>

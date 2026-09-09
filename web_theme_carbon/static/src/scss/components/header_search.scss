@@ -1,0 +1,37 @@
+// Carbon UI Shell global search, in the header.
+//
+// The button lives in Odoo's systray row, so it inherits the navbar entry
+// geometry from $o-navbar-* and only needs the Carbon header-action treatment:
+// square, full-height, and hovering by changing layer rather than tinting.
+//
+// Colours come from the shell tokens, not --cds-*: Carbon's header is g100 in
+// both themes and must not flip with the page.
+
+.o_main_navbar .o_carbon_header_search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-width: 48px;          // Carbon header action is a 48px square
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--cds-shell-text-secondary, #c6c6c6);
+
+    .oi {
+        font-size: 1.125rem;   // 20px, Carbon's header icon size
+    }
+
+    &:hover {
+        background-color: var(--cds-shell-hover, #353535);
+        color: var(--cds-shell-text, #f4f4f4);
+    }
+
+    &:focus-visible {
+        // The header is dark in both themes, so --cds-focus (blue in g10)
+        // would barely register. Carbon uses its inverse focus here.
+        outline: 2px solid var(--cds-shell-focus, #ffffff);
+        outline-offset: -2px;
+        box-shadow: none;
+    }
+}

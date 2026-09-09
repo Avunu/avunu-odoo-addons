@@ -2,7 +2,7 @@
 
 IBM [Carbon Design System](https://carbondesignsystem.com/) styling for the Odoo 18 backend. Light theme is Carbon **g10**, dark is **g100**.
 
-CSS-only: it restyles Odoo's existing markup and does not override a single QWeb template or patch an OWL component. That is deliberate — template drift is where Odoo upgrades actually break themes, and it keeps the port to v19 cheap.
+Almost entirely CSS: it restyles Odoo's existing markup rather than replacing it, because template drift is where Odoo upgrades actually break themes. Two features are the exception — see **Behaviour** below — and each is anchored on the most stable hook available.
 
 ## The one thing to know
 
@@ -78,6 +78,20 @@ Components: list view (`cds--data-table`), fields, form sheet, statusbar
 (`cds--header`), control panel, search bar and panel, apps grid, dialogs
 (`cds--modal`), dropdowns (`cds--menu`), notifications, tags and status badges
 (`cds--tag`) and kanban records (`cds--tile`).
+
+## Behaviour
+
+Two Carbon patterns Odoo has no equivalent for. These are the only parts of the theme that are not pure CSS, so each is anchored on the most stable hook available and the cost of it breaking is stated.
+
+**Global search in the header** (Carbon UI Shell). Odoo's global search is the command palette, reachable only by Ctrl+K, which nobody discovers on their own. The header button opens that same palette rather than introducing a second search. Registered as a **systray item**, which the navbar renders straight from a registry — so there is no template inheritance here at all, and nothing to drift.
+
+**Search on tables** (Carbon data-table toolbar). Filters the rows on screen, which is what Carbon's table search does and what Odoo's control-panel search does not — that one changes the domain and re-queries.
+
+> It filters the **current page**, not the whole record set. That is Carbon's behaviour, but in a paginated ERP it would be a trap if left implicit, so the toolbar shows `n of m` whenever a query is active. For anything beyond the page the control-panel search still works normally. Hidden on grouped lists, where group counts would silently disagree with what is shown.
+
+Rows are **hidden, not removed**: `ListRenderer` renders `list.records` straight from the model, and filtering that array would corrupt selection, keyboard navigation, editing and the aggregate footer. Instead it patches `getRowClass()`, which the row template already calls, so the model is untouched and the row markup is never referenced.
+
+Its two upstream dependencies are `ListRenderer.getRowClass()` and one xpath on the `<table>` element in `web.ListRenderer`. That xpath deliberately targets the element and **not** `hasclass('o_list_table')`: the table carries `t-attf-class`, so it has no static class attribute, `hasclass()` never matches, and the inheritance then throws at template-compile time — taking the whole list view down with it.
 
 ## Brand colours
 

@@ -266,6 +266,47 @@ console.log("\n[8] web_responsive $app-menu-* still declared and still !default"
   }
 }
 
+// -- 10. variables captured before our dark bridge runs ---------------------
+// A silent, and genuinely surprising, way for dark mode to half-apply.
+//
+// web_dark_mode contributes primary_variables.dark.scss to the dark bundle with
+// ('before', 'web/static/src/scss/primary_variables.scss', ...) -- the same
+// anchor we use. Module order puts it BEFORE our dark bridge, so any variable it
+// binds there with !default captures whatever our LIGHT bridge left in scope and
+// keeps it for the whole dark bundle.
+//
+// That is how $o-webclient-background-color ended up #f4f4f4 in dark: it is
+// derived (`$o-gray-100 !default`), not stated, and by the time our dark bridge
+// re-pointed $o-gray-100 the canvas was already bound. The UI was dark, the page
+// behind it was not, and nothing errored.
+//
+// The rule this enforces: anything that file DERIVES from a variable our light
+// bridge sets must be restated outright in bridge_dark/.
+const EARLY_DARK_FILE =
+  "web_dark_mode/static/src/scss/primary_variables.dark.scss";
+console.log("\n[10] variables bound before our dark bridge");
+{
+  const f = path.join(WEB_RESPONSIVE, EARLY_DARK_FILE);
+  if (!fs.existsSync(f)) console.log(`  skip  ${EARLY_DARK_FILE} not present`);
+  else {
+    const names = (files) => new Set(files.flatMap((x) =>
+      [...code(x).matchAll(/^\s*(\$[\w-]+)\s*:/gm)].map((m) => m[1])));
+    const L = names(bridgeLight), D = names(bridgeDark);
+    let bad = 0;
+    for (const st of assignments(code(f))) {
+      const name = st.match(/^(\$[\w-]+)/)[1];
+      if (D.has(name)) continue;                       // we restate it: safe
+      const refs = (st.match(/\$[\w-]+/g) || []).slice(1).filter((r) => L.has(r));
+      if (refs.length) {
+        fail(`${name} is derived from ${refs.join(", ")} in ${EARLY_DARK_FILE}, which ` +
+             `runs BEFORE bridge_dark/ -- it will keep the LIGHT value. Restate it in bridge_dark/.`);
+        bad++;
+      }
+    }
+    if (!bad) ok("nothing derived from our light values is captured early");
+  }
+}
+
 // -- 9. cascade conflicts: see tests/test_cascade.py ------------------------
 // There IS a real failure mode here -- Odoo marks declarations !important and
 // our rule then loses however late it loads, silently. It bit the tag colours:

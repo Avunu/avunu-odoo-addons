@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!--
+        Carbon's data-table toolbar, inserted above the table.
+
+        Anchored on the table ELEMENT, not on hasclass('o_list_table'): the
+        table carries t-attf-class, so it has no static class attribute and
+        hasclass() never matches it — the inheritance then throws at template
+        compile time and the whole list view fails to render. web.ListRenderer
+        contains exactly one <table>, so the element selector is unambiguous,
+        and it survives the row and header changes that do differ between Odoo
+        versions. Hidden for grouped lists: rows there live under group headers
+        whose counts would go stale, and Carbon has no pattern for a search that
+        silently disagrees with the group it sits in.
+    -->
+    <t t-inherit="web.ListRenderer" t-inherit-mode="extension">
+        <xpath expr="//table" position="before">
+            <div
+                t-if="!props.list.isGrouped"
+                class="o_carbon_table_toolbar d-flex align-items-center justify-content-end"
+            >
+                <span
+                    t-if="carbonFilter.query"
+                    class="o_carbon_table_toolbar_count me-2"
+                >
+                    <!-- The scope is stated rather than implied: this filters
+                         the current page, not the whole record set. -->
+                    <t t-esc="carbonFilterCounts.shown" />
+                    <t> of </t>
+                    <t t-esc="carbonFilterCounts.total" />
+                </span>
+                <div
+                    class="o_carbon_table_search"
+                    t-att-class="{ 'o_carbon_table_search_expanded': carbonFilter.expanded }"
+                >
+                    <button
+                        type="button"
+                        class="o_carbon_table_search_toggle btn border-0"
+                        t-att-title="carbonFilterLabel"
+                        t-att-aria-label="carbonFilterLabel"
+                        t-att-aria-expanded="carbonFilter.expanded"
+                        t-on-click="carbonToggleFilter"
+                    >
+                        <i class="oi oi-search" role="img" aria-hidden="true" />
+                    </button>
+                    <input
+                        type="text"
+                        class="o_carbon_table_search_input"
+                        t-att-placeholder="carbonFilterPlaceholder"
+                        t-att-aria-label="carbonFilterLabel"
+                        t-att-tabindex="carbonFilter.expanded ? 0 : -1"
+                        t-model="carbonFilter.query"
+                        t-on-keydown="onCarbonFilterKeydown"
+                    />
+                    <button
+                        t-if="carbonFilter.query"
+                        type="button"
+                        class="o_carbon_table_search_clear btn border-0"
+                        title="Clear"
+                        aria-label="Clear"
+                        t-on-click="carbonClearFilter"
+                    >
+                        <i class="oi oi-close" role="img" aria-hidden="true" />
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
