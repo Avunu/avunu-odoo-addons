@@ -27,6 +27,11 @@
         --table-striped-color: var(--cds-text-secondary);
 
         // -- header: heading-compact-01 (14px / 600) ------------------------
+        // No background-color here: Bootstrap's `.table > :not(caption) > * > *`
+        // is more specific and paints every cell from --table-bg, so a
+        // background on th computes to transparent and the rule is dead. The
+        // header band comes from --ListRenderer-thead-bg-color above, which
+        // Odoo applies to thead itself (verified: thead renders #e0e0e0).
         > thead > tr > th {
             vertical-align: middle;
             border-bottom: 0;

@@ -19,7 +19,13 @@ $o-search-bar-facet-value-width: 16rem;
 // Collapses the statusbar's clip-path chevrons into plain rectangles, which is
 // what turns it into a Carbon content-switcher without touching the markup:
 //   polygon(0 0, calc(100% - W) 0, 100% 50%, ...) with W = 0 is a rectangle.
-$o-statusbar-arrow-width: 0;
+//
+// 0px, NOT 0. Odoo builds the inner polygon with
+//   calc(100% - var(--o-statusbar-caret-width) - var(--o-statusbar-border-width) * sqrt(2))
+// and a unitless zero makes that calc invalid, so the ::before loses its
+// clip-path entirely and paints the whole segment in the BORDER colour --
+// the current step renders as a solid blue block with its label hidden.
+$o-statusbar-arrow-width: 0px;
 $o-field-translate-padding: 32px;
 
 // web_responsive/static/src/legacy/scss/form_variable.scss also hard-assigns
