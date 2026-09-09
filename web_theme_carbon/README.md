@@ -87,7 +87,13 @@ Two Carbon patterns Odoo has no equivalent for. These are the only parts of the 
 
 **Search on tables** (Carbon data-table toolbar). Filters the rows on screen, which is what Carbon's table search does and what Odoo's control-panel search does not — that one changes the domain and re-queries.
 
-> It filters the **current page**, not the whole record set. That is Carbon's behaviour, but in a paginated ERP it would be a trap if left implicit, so the toolbar shows `n of m` whenever a query is active. For anything beyond the page the control-panel search still works normally. Hidden on grouped lists, where group counts would silently disagree with what is shown.
+Scope differs by list type, deliberately:
+
+> **x2many lists inside a form** — the whole relation is searched. An `ir.model` form lists hundreds of fields forty at a time, and a search that cannot see past the current page will not find the field you want, which is the case this exists for. The relation is pulled in once per search (its ids are already known client-side), capped at 2000 records, and the original pagination is restored when the query is cleared.
+>
+> **View lists** — the loaded page only. Their record set is a server-side domain that could be millions of rows, so nothing is pre-loaded; the control-panel search is the right tool there and still works normally.
+
+Either way the toolbar shows `n of m` while a query is active, because the difference matters and should not have to be inferred. Hidden on grouped lists, where group counts would silently disagree with what is shown.
 
 Rows are **hidden, not removed**: `ListRenderer` renders `list.records` straight from the model, and filtering that array would corrupt selection, keyboard navigation, editing and the aggregate footer. Instead it patches `getRowClass()`, which the row template already calls, so the model is untouched and the row markup is never referenced.
 

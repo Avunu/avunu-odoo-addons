@@ -8,7 +8,21 @@
 // two rules that have to beat it say so explicitly rather than by accident.
 
 .o_grid_apps_menu {
-    background-color: var(--cds-background);
+    // NOT background-color. .o_grid_apps_menu wraps BOTH the toggle button in
+    // the navbar AND the drop-down panel, so painting it with the page canvas
+    // put a light #f4f4f4 block in the middle of the dark header. It was
+    // invisible in dark only because the canvas happens to match the shell
+    // there. The panel paints itself from --app-menu-background below.
+    //
+    // web_responsive's default is an SVG overlay over a gradient, keyed on
+    // data-theme; Carbon has no decorative backgrounds, so this is the flat
+    // page canvas instead.
+    //
+    // Declared as a top-level rule below, not here: web_responsive nests its
+    // version inside `:root`, so the selector it actually ships is
+    // `:root .o_grid_apps_menu[data-theme="milk"]` at (0,3,0). A bare class,
+    // or even `&[data-theme]` at (0,2,0), loses to it and the gradient
+    // survives with only the wrapper changing.
 
     .o-app-menu-item {
         border-radius: 0;
@@ -30,8 +44,34 @@
         }
     }
 
+    // The toggle sits in the header, so it takes the shell treatment: a 48px
+    // Carbon header action, transparent until hover.
     .o_grid_apps_menu__button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
         border-radius: 0;
+        background-color: transparent;
         color: var(--cds-shell-text, #f4f4f4);
+
+        &:hover {
+            background-color: var(--cds-shell-hover, #353535);
+        }
+
+        &:focus-visible {
+            // The header is dark in both themes, so --cds-focus would barely
+            // register; Carbon uses its inverse focus here.
+            outline: 2px solid var(--cds-shell-focus, #ffffff);
+            outline-offset: -2px;
+            box-shadow: none;
+        }
     }
+}
+
+// Matching web_responsive's own specificity: it nests this inside `:root`,
+// so anything less loses and the decorative gradient stays. Equal specificity
+// plus a later load is enough; no !important needed.
+:root .o_grid_apps_menu[data-theme] {
+    --app-menu-background: var(--cds-background);
 }

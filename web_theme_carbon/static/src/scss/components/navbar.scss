@@ -24,6 +24,21 @@
         color: var(--cds-shell-text, #f4f4f4);
     }
 
+    // Systray items centre their own content inconsistently: several
+    // components (the user avatar, the company switcher, the debug menu) put
+    // their content in a plain block which then sits at the TOP of the 48px
+    // bar -- measured at a 23.5px container midpoint against inner midpoints
+    // of 11 and 16. Carbon's header aligns everything on one optical line.
+    //
+    // Centring is done from the CONTAINER, not by setting display on the
+    // children: several of them carry Bootstrap's `d-none d-md-block`, which
+    // is `display: block !important`, so a `display: flex` on the child both
+    // loses and -- if forced with !important -- would defeat the responsive
+    // hiding those classes exist for.
+    .o_menu_systray {
+        align-items: center;
+    }
+
     // heading-compact-01: the product name is the one semibold thing up here.
     .o_menu_brand {
         font-weight: 600;

@@ -49,7 +49,8 @@
                         t-att-placeholder="carbonFilterPlaceholder"
                         t-att-aria-label="carbonFilterLabel"
                         t-att-tabindex="carbonFilter.expanded ? 0 : -1"
-                        t-model="carbonFilter.query"
+                        t-att-value="carbonFilter.query"
+                        t-on-input="onCarbonFilterInput"
                         t-on-keydown="onCarbonFilterKeydown"
                     />
                     <button
