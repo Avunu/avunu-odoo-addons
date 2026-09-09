@@ -1,0 +1,26 @@
+// Notifications -> Carbon toast notification (cds--toast-notification).
+//
+// Carbon's notification is a panel on layer-01 with a coloured rule down the
+// leading edge; the bridge already narrows that rule to Carbon's 3px via
+// $o-notification-bar-width.
+
+.o_notification {
+    background-color: var(--cds-layer-01);
+    border: 1px solid var(--carbon-border-subtle);
+    border-radius: 0;
+    box-shadow: 0 2px 6px var(--cds-shadow);
+    font-size: 0.875rem;
+    letter-spacing: 0.16px;
+    color: var(--cds-text-secondary);
+
+    .o_notification_title {
+        font-weight: 600;
+        color: var(--cds-text-primary);
+    }
+
+    // Odoo colours the bar with contextual .bg-* classes, which the bridge has
+    // already routed onto Carbon's support-* tokens.
+    .o_notification_bar {
+        border-radius: 0;
+    }
+}

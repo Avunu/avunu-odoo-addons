@@ -1,0 +1,29 @@
+// Dropdowns and menus -> Carbon menu (cds--menu).
+//
+// The palette arrives through the bridge ($dropdown-bg on layer-02, no border,
+// square). Carbon menus have no border at all -- they read as elevation only.
+//
+// NOTE: Odoo sets Bootstrap's $variable-prefix to '' (bootstrap_overridden.scss),
+// so these are --dropdown-*, NOT --bs-dropdown-*. Writing the --bs- form here
+// would be a silent no-op.
+
+.dropdown-menu,
+.o-dropdown--menu {
+    box-shadow: 0 2px 6px var(--cds-shadow);
+
+    .dropdown-item {
+        font-size: 0.875rem;
+        letter-spacing: 0.16px;
+
+        &:focus-visible {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+        }
+    }
+
+    .dropdown-header {
+        font-size: 0.75rem;
+        letter-spacing: 0.32px;
+        color: var(--cds-text-secondary);
+    }
+}

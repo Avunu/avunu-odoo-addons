@@ -1,0 +1,21 @@
+// Kanban records -> Carbon clickable tile (cds--tile--clickable).
+//
+// The canvas and column background come from the bridge
+// ($o-kanban-background, and root.scss re-points --Kanban-background).
+
+.o_kanban_renderer .o_kanban_record {
+    background-color: var(--cds-layer-01);
+    border: 1px solid var(--carbon-border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+
+    // Carbon tiles change layer on hover; they do not lift or shadow.
+    &:hover {
+        background-color: var(--cds-layer-hover-01);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cds-focus);
+        outline-offset: -2px;
+    }
+}

@@ -1,0 +1,50 @@
+// Tags -> Carbon tag (cds--tag).
+//
+// Tags are one of Carbon's few deliberately ROUND shapes, which is why the
+// bridge keeps $border-radius-pill.
+//
+// $o-colors is deliberately NOT remapped. tags_list.scss derives each tag's
+// colours from it with
+//
+//     adjust-color(nth($o-colors, $i), $lightness: 25%, $saturation: 15%)
+//
+// so feeding it Carbon's already-calibrated tag colours would lighten them a
+// second time and wash them out. The classes are overridden directly instead.
+//
+// Odoo has 12 colour slots; Carbon ships 10 tag colours and deliberately
+// excludes orange and yellow. Those two come from --carbon-tag-*-orange /
+// -yellow, which the token codegen emits per theme so they invert in dark the
+// way Carbon's own tag tokens do.
+
+.o_tag {
+    border-radius: 50rem;
+    font-size: 0.75rem;          // label-01
+    letter-spacing: 0.32px;
+    font-weight: 400;
+}
+
+// HOW THIS WINS, without an !important arms race:
+// tags_list.scss styles each slot through Odoo's o-print-color() mixin, which
+// emits
+//
+//     --background-color: RGBA(...);
+//     background-color: var(--background-color) !important;
+//
+// so the declaration that actually applies is Odoo's, and it is !important --
+// a plain `background-color` here would lose no matter how late it loads.
+// Setting the CUSTOM PROPERTY instead makes Odoo's own rule serve our value,
+// which is both cleaner and immune to load order.
+@each $-slot, $-name in (0: "gray", 1: "red", 2: "orange", 3: "yellow",
+                         4: "blue", 5: "purple", 6: "warm-gray", 7: "teal",
+                         8: "cool-gray", 9: "magenta", 10: "green", 11: "cyan") {
+    .o_tag.o_tag_color_#{$-slot} {
+        // orange and yellow resolve to the --carbon-* aliases the codegen
+        // emits per theme; the rest to Carbon's own theme-aware tag tokens.
+        $-ns: if($-name == "orange" or $-name == "yellow", "carbon", "cds");
+
+        &, &::after {
+            --background-color: var(--#{$-ns}-tag-background-#{$-name});
+            --color: var(--#{$-ns}-tag-color-#{$-name});
+        }
+    }
+}

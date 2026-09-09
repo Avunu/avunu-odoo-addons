@@ -1,0 +1,37 @@
+// Dialogs -> Carbon modal (cds--modal).
+//
+// Colours come from the bridge ($modal-content-bg, $modal-backdrop-*). Carbon
+// puts a modal on layer-01 in EVERY theme, which is what the bridge sets.
+//
+// Carbon's flush full-bleed footer is deliberately NOT reproduced: it assumes
+// exactly two buttons, and Odoo wizards routinely carry three or four, where
+// the flush treatment degrades badly.
+
+.modal {
+    .modal-content {
+        border-radius: 0;
+        box-shadow: 0 2px 6px var(--cds-shadow);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--carbon-border-subtle);
+    }
+
+    // heading-03: 20px / 400, and Carbon drops tracking at and above 20px.
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 400;
+        letter-spacing: 0;
+        color: var(--cds-text-primary);
+    }
+
+    .modal-body {
+        font-size: 0.875rem;
+        letter-spacing: 0.16px;
+        color: var(--cds-text-secondary);
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--carbon-border-subtle);
+    }
+}
