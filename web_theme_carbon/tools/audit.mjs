@@ -266,6 +266,26 @@ console.log("\n[8] web_responsive $app-menu-* still declared and still !default"
   }
 }
 
+// -- 9. cascade conflicts: see tests/test_cascade.py ------------------------
+// There IS a real failure mode here -- Odoo marks declarations !important and
+// our rule then loses however late it loads, silently. It bit the tag colours:
+// tags_list.scss goes through o-print-color(), which expands to
+//   --background-color: RGBA(...);  background-color: var(--background-color) !important;
+// so a plain `background-color` never applied and the tags kept Odoo's
+// washed-out adjust-color() values, with nothing in the log.
+//
+// A static SCSS scan cannot decide this honestly. Odoo's selectors are nested,
+// its !important lives in mixins, and file-scoped matching attributes a
+// declaration to whichever class happens to appear nearby -- every version of
+// that check flagged a dozen pairs that the compiled bundle then showed us
+// winning. A guard that cries wolf gets ignored, which is worse than no guard.
+//
+// The honest test needs the COMPILED bundle, so it lives in
+// tests/test_cascade.py and runs under `odoo --test-enable`, where the answer
+// is unambiguous.
+console.log("\n[9] cascade conflicts");
+ok("checked by tests/test_cascade.py against the compiled bundle, not here");
+
 console.log(
   failures === 0
     ? "\nAudit passed."
