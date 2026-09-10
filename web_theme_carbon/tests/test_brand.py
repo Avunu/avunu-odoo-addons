@@ -2,11 +2,16 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 """Guards the per-company brand colour configuration."""
 
+from unittest.mock import patch
+
 from odoo.tests.common import TransactionCase, tagged
 
 from ..models.res_company import (
     CARBON_DARK,
     CARBON_LIGHT,
+    CARBON_SHELL,
+    blend,
+    luma,
     parse_hex,
     readable_on,
     shift,
@@ -133,3 +138,65 @@ class TestCarbonBrand(TransactionCase):
         css = self._style()
         for fn in ("darken(", "lighten(", "mix("):
             self.assertNotIn(fn, css)
+
+    # -- header ---------------------------------------------------------------
+
+    def test_header_entries_follow_the_header_colour(self):
+        """The bug this guards: a branded header with Carbon-shell entries.
+
+        Odoo paints every navbar entry from $o-navbar-background, compiled to
+        the near-black shell tone. Setting only .o_main_navbar left those
+        entries as opaque dark blocks sitting on a coloured bar. They are
+        re-pointed through Odoo's --NavBar-* custom properties instead.
+        """
+        self.company.carbon_header_bg = "#e8574c"
+        css = self._style()
+        for prop in (
+            "--NavBar-entry-backgroundColor",
+            "--NavBar-entry-backgroundColor--hover",
+            "--NavBar-entry-backgroundColor--active",
+            "--NavBar-entry-color",
+            "--NavBar-brand-color",
+        ):
+            self.assertIn(prop, css, f"{prop} is not re-pointed at the header colour")
+        self.assertIn("--NavBar-entry-backgroundColor: #e8574c", css)
+        # and the theme's own header pieces follow through the shell aliases
+        self.assertIn("--cds-shell-bg: #e8574c", css)
+
+    def test_header_hover_moves_away_from_the_background(self):
+        """Light headers must darken on hover, dark ones lighten.
+
+        Carbon's shell lightens because it is near-black; applying that blindly
+        to a light header would make "hover" mean "wash out".
+        """
+        self.company.carbon_header_bg = "#161616"
+        dark_hover = self.company._carbon_palette()["header_hover"]
+        self.assertGreater(luma(dark_hover), luma("#161616"))
+
+        self.company.carbon_header_bg = "#f4f4f4"
+        light_hover = self.company._carbon_palette()["header_hover"]
+        self.assertLess(luma(light_hover), luma("#f4f4f4"))
+
+    def test_header_defaults_stay_carbon(self):
+        self.company.carbon_brand_light = "#009d9a"   # customised, header not
+        palette = self.company._carbon_palette()
+        self.assertEqual(palette["header_bg"], CARBON_SHELL["bg"])
+        self.assertEqual(palette["header_hover"], CARBON_SHELL["hover"])
+
+    def test_blend_moves_between_two_colours(self):
+        self.assertEqual(blend("#000000", "#ffffff", 0.0), "#000000")
+        self.assertEqual(blend("#000000", "#ffffff", 1.0), "#ffffff")
+        self.assertEqual(blend("#000000", "#ffffff", 0.5), "#808080")
+        self.assertEqual(blend("nope", "#ffffff", 0.5), "nope")
+
+    def test_broken_palette_never_breaks_the_backend(self):
+        """This renders into the webclient <head>.
+
+        A raise here does not degrade the theme, it replaces the whole backend
+        with a traceback -- which is what happened while developing it.
+        """
+        self.company.carbon_brand_light = "#009d9a"
+        with patch.object(
+            type(self.company), "_carbon_palette", side_effect=ValueError("boom")
+        ):
+            self.assertEqual(self._style(), "")
