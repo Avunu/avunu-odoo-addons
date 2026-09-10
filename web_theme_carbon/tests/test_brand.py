@@ -236,3 +236,37 @@ class TestCarbonBrand(TransactionCase):
         css = self._style()
         self.assertIn(".o-dropdown.btn-secondary.show", css)
         self.assertIn("border-color: #cd4c4c", css)
+
+    def test_bootstrap_theme_colour_family_is_branded(self):
+        """The highest-leverage override, and the least obvious.
+
+        Odoo does NOT let Bootstrap generate .text-*/.bg-*: it builds them with
+        o-print-color(), which emits `--color: RGBA(...); color: var(--color)
+        !important`. So the utilities are re-pointed by setting the property
+        Odoo's own !important rule reads -- the same trick the tag colours use --
+        while the "subtle" family really is read off :root by Bootstrap.
+        """
+        self.company.carbon_brand_light = "#cd4c4c"
+        css = self._style()
+        self.assertIn("--primary: #cd4c4c", css)
+        self.assertIn("--primary-rgb: 205, 76, 76", css)
+        self.assertIn("--primary-bg-subtle", css)
+        # utilities go through the custom property, not a plain declaration
+        self.assertIn(".text-primary", css)
+        self.assertIn("--color: rgba(205, 76, 76", css)
+        self.assertIn(".text-action", css)
+
+    def test_compiled_literals_get_real_rules(self):
+        """Four places Odoo compiles a colour with no custom property behind it.
+
+        Each needs an actual rule; a token cannot reach any of them.
+        """
+        self.company.carbon_brand_light = "#cd4c4c"
+        css = self._style()
+        for selector in (
+            "--o-statusbar-border-active",              # status tracker ::before
+            ".o_searchview:focus-within",               # search bar outline
+            ".o-dropdown.btn-secondary.show",           # open dropdown rim
+            ".dropdown-item.active",                    # selected-item checkmark
+        ):
+            self.assertIn(selector, css, f"{selector} is not branded")
