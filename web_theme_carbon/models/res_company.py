@@ -25,12 +25,15 @@ asset bundles, rather than a generated stylesheet:
   emitted directly instead of shipping both and letting the cascade decide.
 """
 
+import logging
 from colorsys import hls_to_rgb, rgb_to_hls
 
 from markupsafe import Markup
 
 from odoo import api, fields, models
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 # Carbon's own values, mirrored from
 # static/src/scss/generated/_carbon_tokens{,_dark}.scss. They are the fallback
@@ -56,6 +59,9 @@ CARBON_SHELL = {
     "bg": "#161616",  # the UI Shell header is g100 in every Carbon theme
     "border": "#393939",
     "text": "#f4f4f4",
+    "text_secondary": "#c6c6c6",
+    "hover": "#353535",
+    "active": "#393939",
 }
 
 
@@ -100,16 +106,32 @@ def shift(value, amount):
     return "#%02x%02x%02x" % (int(red * 255), int(green * 255), int(blue * 255))
 
 
+def blend(colour, towards, amount):
+    """Mix `colour` `amount` of the way towards `towards`. Both hex, result hex."""
+    a, b = parse_hex(colour), parse_hex(towards)
+    if a is None or b is None:
+        return colour
+    mixed = [a[i] + (b[i] - a[i]) * amount for i in range(3)]
+    return "#%02x%02x%02x" % tuple(int(round(c * 255)) for c in mixed)
+
+
+def luma(colour):
+    """Rec. 709 relative luminance, 0..1. Returns None for a bad colour."""
+    rgb = parse_hex(colour)
+    if rgb is None:
+        return None
+    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+
+
 def readable_on(background):
     """Black or white, whichever reads better on `background`.
 
     Rec. 709 luma, the same measure web_company_color uses to pick navbar text.
     """
-    rgb = parse_hex(background)
-    if rgb is None:
+    value = luma(background)
+    if value is None:
         return CARBON_SHELL["text"]
-    luma = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
-    return "#161616" if luma > 0.5 else "#f4f4f4"
+    return "#161616" if value > 0.5 else "#f4f4f4"
 
 
 class ResCompany(models.Model):
@@ -180,6 +202,8 @@ class ResCompany(models.Model):
         # relative treatment. Dark themes brighten on hover instead of darkening.
         direction = -1 if dark else 1
         header_bg = self.carbon_header_bg or CARBON_SHELL["bg"]
+        header_text = self.carbon_header_text or readable_on(header_bg)
+        is_default_shell = header_bg == CARBON_SHELL["bg"]
 
         return {
             "brand": brand,
@@ -190,7 +214,25 @@ class ResCompany(models.Model):
             "link_hover": base["link_hover"] if is_carbon_default else shift(brand, 0.10 * direction),
             "header_bg": header_bg,
             "header_border": shift(header_bg, -0.08) if header_bg != CARBON_SHELL["bg"] else CARBON_SHELL["border"],
-            "header_text": self.carbon_header_text or readable_on(header_bg),
+            "header_text": header_text,
+            # Carbon's shell lightens on hover because it is near-black. A
+            # mid-tone or light header has to go the other way, or "hover"
+            # would mean "wash out".
+            "header_hover": (
+                CARBON_SHELL["hover"] if is_default_shell
+                else shift(header_bg, -0.06 if (luma(header_bg) or 0) < 0.5 else 0.06)
+            ),
+            "header_active": (
+                CARBON_SHELL["active"] if is_default_shell
+                else shift(header_bg, -0.10 if (luma(header_bg) or 0) < 0.5 else 0.10)
+            ),
+            # The de-emphasised label colour. Carbon uses gray-30 on its own
+            # shell; on a branded header the equivalent is the header's text
+            # pulled a little way back towards the header itself.
+            "header_text_secondary": (
+                CARBON_SHELL["text_secondary"] if is_default_shell
+                else blend(header_text, header_bg, 0.25)
+            ),
         }
 
     def _carbon_is_customised(self):
@@ -214,7 +256,16 @@ class ResCompany(models.Model):
         company = self.env.company
         if not company or not company._carbon_is_customised():
             return Markup("")
-        palette = company._carbon_palette(dark=company._carbon_is_dark())
+        try:
+            palette = company._carbon_palette(dark=company._carbon_is_dark())
+        except Exception:  # pragma: no cover - defensive
+            # This renders into the webclient <head>. A raise here does not
+            # degrade the theme, it takes the entire backend down with a
+            # traceback instead of a page -- which is exactly what happened
+            # while developing this method. A styling asset must never be able
+            # to do that, so a broken palette falls back to no branding at all.
+            _logger.exception("web_theme_carbon: could not build the brand palette")
+            return Markup("")
         return Markup(
             """
 /* web_theme_carbon: %(name)s brand colours, as Carbon tokens. */
@@ -258,12 +309,37 @@ class ResCompany(models.Model):
     --btn-active-bg: %(brand_active)s;
     --btn-active-border-color: %(brand_active)s;
 }
-/* The header is the one surface the theme compiles from SCSS variables
-   ($o-navbar-*), which no custom property can reach. */
+/* The header bar itself is the one declaration that has to be plain: Odoo
+   compiles `.o_main_navbar { background: $o-navbar-background }` with no
+   custom property behind it.
+   
+   Everything INSIDE the bar does have one. Odoo routes every navbar entry
+   through --NavBar-* (navbar.scss), so re-pointing those is enough and no
+   selector has to be enumerated. Without them the entries keep their compiled
+   Carbon-shell colours and sit as opaque near-black blocks on a branded
+   header -- which is exactly what a coloured header used to look like. */
 .o_main_navbar {
     background-color: %(header_bg)s;
     border-bottom: 1px solid %(header_border)s;
     color: %(header_text)s;
+
+    --NavBar-entry-backgroundColor: %(header_bg)s;
+    --NavBar-entry-backgroundColor--hover: %(header_hover)s;
+    --NavBar-entry-backgroundColor--focus: %(header_hover)s;
+    --NavBar-entry-backgroundColor--active: %(header_active)s;
+    --NavBar-entry-color: %(header_text_secondary)s;
+    --NavBar-entry-color--hover: %(header_text)s;
+    --NavBar-entry-color--active: %(header_text)s;
+    --NavBar-brand-color: %(header_text)s;
+
+    /* The theme's own header pieces -- the global search button, the apps
+       toggle -- read these aliases, so they follow the brand too instead of
+       staying on the Carbon shell tones. */
+    --cds-shell-bg: %(header_bg)s;
+    --cds-shell-text: %(header_text)s;
+    --cds-shell-text-secondary: %(header_text_secondary)s;
+    --cds-shell-hover: %(header_hover)s;
+    --cds-shell-active: %(header_active)s;
 }
 """
             % dict(palette, name=company.name)

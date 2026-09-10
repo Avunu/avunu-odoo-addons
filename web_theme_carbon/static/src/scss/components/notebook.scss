@@ -1,25 +1,55 @@
-// Notebook -> Carbon tabs (line variant).
+// Notebook -> Carbon tabs, line variant.
 //
-// Odoo exposes the whole tab underline through custom properties, so this is a
-// four-line change plus typography.
+// Carbon's line tab is a rule under the whole tab row, with the selected tab
+// carrying a 2px accent on top of it and the label lifted to full-strength
+// text. Odoo draws its tabs the Bootstrap way instead -- a full border box per
+// tab, with the active one "connecting" to the panel by painting its own
+// bottom border in the sheet colour.
+//
+// Those two do not combine, and the bridge already sets
+// $nav-tabs-border-width: 0 to stop Bootstrap drawing tab boxes -- which left
+// the tabs with no underline at all, active or otherwise.
+//
+// So the rule is drawn with inset box-shadows rather than borders: it cannot
+// be cancelled by the zeroed border width, it does not change the tab's height
+// the way a 2px border would, and the selected accent can sit on top of the
+// row rule instead of replacing it.
 
 .o_notebook {
-    --notebook-link-border-color: var(--carbon-border-subtle);
+    // Kept so anything else reading them stays consistent, even though the
+    // visible rule below is drawn with box-shadow.
+    --notebook-link-border-color: transparent;
     --notebook-link-border-color-hover: var(--cds-border-strong-01);
     --notebook-link-border-color-active: var(--cds-border-interactive);
     --notebook-link-border-color-active-accent: var(--cds-border-interactive);
 
+    .o_notebook_headers .nav {
+        // The rule under the whole row.
+        box-shadow: inset 0 -1px 0 0 var(--carbon-border-subtle);
+    }
+
     .o_notebook_headers .nav-link {
+        min-height: 40px;              // Carbon tab, md
+        display: flex;
+        align-items: center;
         border-radius: 0;
-        font-size: 0.875rem;
+        background-color: transparent;
+        font-size: 0.875rem;           // body-compact-01
         letter-spacing: 0.16px;
         color: var(--cds-text-secondary);
 
+        &:hover:not(.active) {
+            color: var(--cds-text-primary);
+            box-shadow: inset 0 -1px 0 0 var(--cds-border-strong-01);
+        }
+
         &.active {
-            // Carbon marks the selected tab with weight, not a filled block.
+            // Carbon marks the selection with weight and a 2px accent, never
+            // with a filled block.
             font-weight: 600;
             color: var(--cds-text-primary);
             background-color: transparent;
+            box-shadow: inset 0 -2px 0 0 var(--cds-border-interactive);
         }
 
         &:focus-visible {
