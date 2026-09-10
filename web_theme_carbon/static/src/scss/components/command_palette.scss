@@ -1,0 +1,58 @@
+// Command palette search -> Carbon search field.
+//
+// Odoo renders the palette's input as `form-control border-0 p-0`, i.e. a bare
+// borderless input with NO padding, sitting inside a padded wrapper. Against
+// the theme's focus ring that reads badly: the 2px outline lands directly on
+// the text with nothing between them, where Carbon's search puts the text well
+// inside a filled field.
+//
+// The field look therefore moves onto the wrapper, which is the element that
+// actually spans the search row, and the input keeps no ring of its own.
+
+.o_command_palette {
+    .o_command_palette_search {
+        // Carbon search, lg. The template carries `px-4 py-3`, which are
+        // Bootstrap utilities and therefore !important -- overriding a utility
+        // is the sanctioned case for matching it. Without this the field is
+        // 79px tall with the text floating in the middle of it.
+        padding: 0 var(--cds-spacing-05, 1rem) !important;
+        min-height: 48px;
+        align-items: center;
+        background-color: var(--cds-field-01);
+        // The template's own `border-bottom` utility draws the rule; it just
+        // needs Carbon's stronger field tone rather than the subtle one.
+        border-bottom-color: var(--cds-border-strong-01) !important;
+
+        &:focus-within {
+            outline: 2px solid var(--cds-focus);
+            outline-offset: -2px;
+            box-shadow: none;
+        }
+
+        input {
+            // `p-0` is a Bootstrap utility, so !important is the only way to
+            // give the text room -- the sanctioned case for it.
+            padding: 0 var(--cds-spacing-03, 0.5rem) !important;
+            min-height: 46px;
+            background-color: transparent;
+            font-size: 1rem;
+            color: var(--cds-text-primary);
+
+            &::placeholder {
+                color: var(--cds-text-placeholder);
+            }
+
+            // The ring belongs to the field, not to the bare input inside it.
+            &:focus,
+            &:focus-visible {
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        .oi,
+        .fa {
+            color: var(--cds-icon-secondary);
+        }
+    }
+}
