@@ -393,16 +393,14 @@ class ResCompany(models.Model):
 }
 
 /* search_view.scss compiles `border-color: $input-focus-border-color` on
-   focus, again with no property behind it, so the search bar outlined itself
-   in Carbon blue while the input inside it was already branded. */
-.o_searchview:focus-within {
-    border-color: %(brand)s;
-}
-
+   focus, with no property behind it, so the bar recoloured its 1px border in
+   Carbon blue. Carbon does not signal focus with a border at all -- it uses a
+   single 2px inset ring, which components/search.scss now draws from
+   --cds-focus -- so the border is held at the resting colour instead of being
+   branded, which is what stopped it reading as a double outline. */
+.o_searchview:focus-within,
 .o_searchview:focus-within + .o_searchview_dropdown_toggler {
-    border-top-color: %(brand)s;
-    border-right-color: %(brand)s;
-    border-bottom-color: %(brand)s;
+    border-color: var(--carbon-border-subtle);
 }
 
 /* .btn-link and .btn-light both carry the link colour: the theme maps

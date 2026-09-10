@@ -8,6 +8,32 @@
     font-size: 0.875rem;
     letter-spacing: 0.16px;
 
+    // ONE focus ring, on the field.
+    //
+    // Carbon puts a single 2px inset outline on the search field itself
+    // (components/search/_search.scss: `focus-outline('outline')` on
+    // .cds--search-input) and nothing nested inside it. Odoo's search bar is
+    // the field -- it holds the icon, the facets and the input -- so the ring
+    // belongs here, and the bare <input> inside must not draw its own or the
+    // two stack into a double outline.
+    //
+    // Declared transparent at rest, which is what Carbon's
+    // `focus-outline('reset')` is for: the ring always occupies its 2px, so
+    // focusing does not shift the layout by a pixel.
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+
+    &:focus-within {
+        outline-color: var(--cds-focus);
+    }
+
+    .o_searchview_input {
+        &:focus,
+        &:focus-visible {
+            outline: none;
+        }
+    }
+
     .o_searchview_input {
         color: var(--cds-text-primary);
 
