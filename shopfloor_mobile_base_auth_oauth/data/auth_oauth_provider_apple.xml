@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026 Avunu LLC (avu.nu)
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+-->
+<odoo noupdate="1">
+    <!-- Disabled until apple_team_id/apple_key_id/apple_private_key and a
+         real client_id (the Services ID from the Apple Developer portal)
+         are set, and `_cron_rotate_apple_client_secret()` has populated
+         `client_secret` at least once (see this module's README / the
+         plan's Verification section). -->
+    <record id="provider_apple" model="auth.oauth.provider">
+        <field name="name">Apple (Shopfloor)</field>
+        <field name="flow">id_token_code</field>
+        <field name="enabled" eval="False" />
+        <field name="auth_endpoint">https://appleid.apple.com/auth/authorize</field>
+        <field name="token_endpoint">https://appleid.apple.com/auth/token</field>
+        <field name="jwks_uri">https://appleid.apple.com/auth/keys</field>
+        <field name="scope">name email</field>
+        <field name="css_class">fa fa-fw fa-apple</field>
+        <field name="body">Log in with Apple</field>
+    </record>
+</odoo>

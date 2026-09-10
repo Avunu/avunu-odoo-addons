@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026 Avunu LLC (avu.nu)
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+-->
+<odoo noupdate="1">
+    <!-- A new record on purpose, not a rewrite of core `auth_oauth`'s own
+         seeded `provider_google` (id `auth_oauth.provider_google`): that
+         one uses the old implicit/access_token flow and has no client_id
+         set, so an admin may already be relying on it as-is for `/web/
+         login`. This one is OIDC's id_token_code flow specifically, left
+         disabled until a real client_id/client_secret are set (see this
+         module's README / the plan's Verification section). -->
+    <record id="provider_google" model="auth.oauth.provider">
+        <field name="name">Google (Shopfloor)</field>
+        <field name="flow">id_token_code</field>
+        <field name="enabled" eval="False" />
+        <field
+            name="auth_endpoint"
+        >https://accounts.google.com/o/oauth2/v2/auth</field>
+        <field name="token_endpoint">https://oauth2.googleapis.com/token</field>
+        <field name="jwks_uri">https://www.googleapis.com/oauth2/v3/certs</field>
+        <field name="scope">openid email profile</field>
+        <field name="css_class">fa fa-fw fa-google</field>
+        <field name="body">Log in with Google</field>
+    </record>
+</odoo>

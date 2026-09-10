@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC (avu.nu)
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <record model="ir.ui.view" id="mail_gateway_form_view">
+        <field name="name">mail.gateway.form (twilio)</field>
+        <field name="model">mail.gateway</field>
+        <field name="inherit_id" ref="mail_gateway.mail_gateway_form_view" />
+        <field name="arch" type="xml">
+            <field name="webhook_user_id" position="after">
+                <field
+                    name="twilio_from_number"
+                    invisible="gateway_type != 'twilio'"
+                    placeholder="+15551234567"
+                />
+                <field
+                    name="twilio_messaging_service_sid"
+                    invisible="gateway_type != 'twilio'"
+                    placeholder="MG..."
+                />
+            </field>
+            <!-- Expose the webhook URL (base hides it behind group_no_one) so it
+                 can be copied into Twilio when auto-registration is not used. -->
+            <field name="webhook_url" position="attributes">
+                <attribute name="groups" />
+                <attribute name="readonly">1</attribute>
+            </field>
+            <notebook position="inside">
+                <page
+                    name="twilio"
+                    string="Twilio configuration"
+                    invisible="gateway_type != 'twilio'"
+                >
+                    <div>
+                        <h2>Credential mapping</h2>
+                        <p>This gateway reuses the generic fields above with a
+                            Twilio meaning:</p>
+                        <ul>
+                            <li><b>Token</b> = your Twilio <b>Account SID</b> (starts
+                                with <code>AC</code>).</li>
+                            <li><b>Webhook Secret</b> = your Twilio <b>Auth
+                                Token</b> (used both to authenticate API calls and
+                                to validate the <code>X-Twilio-Signature</code> on
+                                inbound requests — it is required).</li>
+                            <li><b>Webhook Key</b> = any random string of your
+                                choice; it is the secret segment of the inbound URL.</li>
+                        </ul>
+                        <h2>Sender</h2>
+                        <p>Set either a <b>Twilio From Number</b> (E.164) or a
+                            <b>Messaging Service SID</b>. When both are set the
+                            Messaging Service is used (recommended for US A2P
+                            10DLC).</p>
+                        <h2>Setup steps</h2>
+                        <ol>
+                            <li>Fill Name, Token (Account SID), Webhook Secret (Auth
+                                Token), a random Webhook Key, and the sender.</li>
+                            <li>Add the users who should handle the conversations in
+                                the <b>Members</b> tab.</li>
+                            <li>Save, then press <b>Integrate Webhook</b>. The module
+                                registers the inbound URL on your Twilio number or
+                                Messaging Service automatically. If that fails (e.g.
+                                limited API permissions), copy the <b>Inbound Webhook
+                                URL</b> above into the number's "A message comes in"
+                                field in the Twilio console.</li>
+                            <li>Ensure <b>web.base.url</b> is your public HTTPS URL
+                                and <b>proxy_mode</b> is enabled, so the signature
+                                validation URL matches what Twilio calls.</li>
+                        </ol>
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

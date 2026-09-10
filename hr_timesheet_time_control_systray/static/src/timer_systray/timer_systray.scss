@@ -1,0 +1,21 @@
+// Copyright 2026 Avunu LLC (avu.nu)
+// License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+
+.o_tt_systray_toggle {
+    // Tabular figures, so the seconds ticking over does not shove the rest of
+    // the systray sideways once a second.
+    .o_tt_elapsed {
+        font-variant-numeric: tabular-nums;
+    }
+
+    &.o_tt_running {
+        color: $o-brand-odoo;
+        font-weight: bold;
+    }
+}
+
+.o_tt_systray_menu {
+    .font-monospace {
+        font-variant-numeric: tabular-nums;
+    }
+}

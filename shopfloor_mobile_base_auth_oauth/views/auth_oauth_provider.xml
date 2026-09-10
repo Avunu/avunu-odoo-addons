@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026 Avunu LLC (avu.nu)
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+    <record id="view_oauth_provider_form_apple" model="ir.ui.view">
+        <field name="name">auth.oauth.provider.form.apple</field>
+        <field name="model">auth.oauth.provider</field>
+        <!-- Inherits `auth_oidc`'s own view specifically (not the bare
+             `auth_oauth.view_oauth_provider_form`), so this xpath's target
+             field (`client_secret`, added by that view) is guaranteed to
+             exist rather than depending on inheriting-view apply order. -->
+        <field name="inherit_id" ref="auth_oidc.view_oidc_provider_form" />
+        <field name="arch" type="xml">
+            <field name="client_secret" position="after">
+                <field name="apple_team_id" />
+                <field name="apple_key_id" />
+                <field name="apple_private_key" password="True" />
+            </field>
+        </field>
+    </record>
+</odoo>

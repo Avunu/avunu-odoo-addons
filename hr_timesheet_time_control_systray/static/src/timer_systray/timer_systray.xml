@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2026 Avunu LLC (avu.nu)
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). -->
+<templates xml:space="preserve">
+
+    <t t-name="hr_timesheet_time_control_systray.TimesheetTimerSystray">
+        <t t-if="state.enabled">
+            <Dropdown position="'bottom-end'" beforeOpen.bind="load" menuClass="'p-3 o_tt_systray_menu'" state="dropdown">
+                <button
+                    class="o_tt_systray_toggle"
+                    t-att-class="state.timer ? 'o_tt_running' : ''"
+                    t-att-title="state.timer ? 'Timer running' : 'No timer running'"
+                >
+                    <i class="fa fa-clock-o" role="img" aria-label="Timesheet timer" />
+                    <span t-if="state.timer" class="o_tt_elapsed ms-1" t-esc="formattedElapsed" />
+                </button>
+
+                <t t-set-slot="content">
+                    <div class="d-flex flex-column gap-3" style="min-width: 16rem;">
+
+                        <!-- The switch wizard refuses to run with more than one
+                             running timer, so say so rather than let Start fail. -->
+                        <div t-if="state.runningCount > 1" class="alert alert-warning mb-0 py-2" role="alert">
+                            <t t-esc="state.runningCount" /> timers are running at once.
+                            Stop them until only one is left.
+                        </div>
+
+                        <t t-if="state.timer">
+                            <div>
+                                <div class="fs-2 lh-1 text-info font-monospace" t-esc="formattedElapsed" />
+                                <small class="text-muted">Since <t t-esc="startedAt" /></small>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-truncate" t-esc="state.timer.name" />
+                                <small t-if="subtitle" class="d-block text-muted text-truncate" t-esc="subtitle" />
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button
+                                    t-if="state.timer.origin_model"
+                                    class="btn btn-secondary flex-grow-1"
+                                    t-on-click="() => this.onOpenOrigin()"
+                                >
+                                    Open
+                                </button>
+                                <button
+                                    class="btn btn-warning flex-grow-1"
+                                    t-att-disabled="state.stopping ? 'disabled' : undefined"
+                                    t-on-click="() => this.onStop()"
+                                >
+                                    Stop<i class="fa fa-stop-circle ms-1" />
+                                </button>
+                            </div>
+                        </t>
+
+                        <t t-else="">
+                            <div class="text-muted">No timer running.</div>
+                            <button class="btn btn-success" t-on-click="() => this.onStart()">
+                                Start work<i class="fa fa-play-circle ms-1" />
+                            </button>
+                        </t>
+
+                    </div>
+                </t>
+            </Dropdown>
+        </t>
+    </t>
+
+</templates>

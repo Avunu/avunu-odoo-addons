@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC (avu.nu)
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html). -->
+<odoo>
+    <!--
+        Inject the camera-scanning assets into the Shopfloor mobile PWA.
+
+        Loaded BEFORE the main app script (script_app_main) but AFTER the base
+        template has already declared the searchbar component, so our override
+        (searchbar_camera.esm.js) can extend the global "searchbar" component
+        before the Vue root is instantiated.
+    -->
+    <template
+        id="shopfloor_app_assets"
+        inherit_id="shopfloor_mobile_base.shopfloor_app_assets"
+    >
+        <script id="script_app_main" position="before">
+            <t
+                t-set="cam_version"
+                t-value="get_version('shopfloor_mobile_camera_scan')"
+            />
+            <link
+                id="link_css_camera_scan"
+                t-attf-href="/shopfloor_mobile_camera_scan/static/src/css/camera_scan.css?v=#{cam_version}"
+                rel="stylesheet"
+            />
+            <script
+                id="script_camera_scanner"
+                t-attf-src="/shopfloor_mobile_camera_scan/static/src/js/camera_scanner.esm.js?v=#{cam_version}"
+                type="module"
+            />
+            <script
+                id="script_searchbar_camera"
+                t-attf-src="/shopfloor_mobile_camera_scan/static/src/js/searchbar_camera.esm.js?v=#{cam_version}"
+                type="module"
+            />
+        </script>
+    </template>
+</odoo>
