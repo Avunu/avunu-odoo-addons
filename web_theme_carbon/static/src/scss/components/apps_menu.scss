@@ -24,6 +24,37 @@
     // or even `&[data-theme]` at (0,2,0), loses to it and the gradient
     // survives with only the wrapper changing.
 
+    // ONE focus ring, on the field -- the third place this comes up, after
+    // .o_searchview and the command palette.
+    //
+    // Carbon puts a single 2px inset outline on the search FIELD
+    // (components/search/_search.scss) and never on a control nested inside
+    // it. web_responsive wraps this input in a 44px white .search-input box,
+    // so the theme's generic input ring landed on the 28px <input> and drew a
+    // second, smaller outline inside the visible field.
+    //
+    // Transparent at rest, which is Carbon's focus-outline('reset'): the ring
+    // always occupies its 2px, so focusing does not shift the layout.
+    //
+    // Deliberately repeated rather than shared through a mixin: the components
+    // glob is sorted, so a mixin would have to live in a file that sorts ahead
+    // of every consumer, and that ordering is a worse thing to depend on than
+    // four duplicated lines.
+    .search-input {
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+
+        &:focus-within {
+            outline-color: var(--cds-focus);
+        }
+
+        input:focus,
+        input:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+    }
+
     .o-app-menu-item {
         border-radius: 0;
         color: var(--cds-text-primary);
