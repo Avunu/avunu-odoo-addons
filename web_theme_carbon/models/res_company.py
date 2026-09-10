@@ -115,6 +115,19 @@ def blend(colour, towards, amount):
     return "#%02x%02x%02x" % tuple(int(round(c * 255)) for c in mixed)
 
 
+def rgb_triple(colour):
+    """`#0f62fe` -> `15, 98, 254`, for the `*-rgb` custom properties.
+
+    Bootstrap composes link colour as
+    `rgba(var(--link-color-rgb), var(--link-opacity, 1))`, so branding links
+    means supplying the channels, not a hex string.
+    """
+    rgb = parse_hex(colour)
+    if rgb is None:
+        return None
+    return ", ".join(str(int(round(c * 255))) for c in rgb)
+
+
 def luma(colour):
     """Rec. 709 relative luminance, 0..1. Returns None for a bad colour."""
     rgb = parse_hex(colour)
@@ -212,6 +225,12 @@ class ResCompany(models.Model):
             "on_brand": base["on_brand"] if is_carbon_default else readable_on(brand),
             "link": brand,
             "link_hover": base["link_hover"] if is_carbon_default else shift(brand, 0.10 * direction),
+            "brand_rgb": rgb_triple(brand) or "15, 98, 254",
+            "link_rgb": rgb_triple(brand) or "15, 98, 254",
+            "link_hover_rgb": (
+                rgb_triple(base["link_hover"] if is_carbon_default else shift(brand, 0.10 * direction))
+                or "0, 67, 206"
+            ),
             "header_bg": header_bg,
             "header_border": shift(header_bg, -0.08) if header_bg != CARBON_SHELL["bg"] else CARBON_SHELL["border"],
             "header_text": header_text,
@@ -299,6 +318,47 @@ class ResCompany(models.Model):
     --btn-disabled-bg: %(brand)s;
     --btn-disabled-border-color: %(brand)s;
 }
+/* Links. Odoo compiles $o-main-link-color into a literal, so the tokens above
+   cannot reach an ordinary <a>. Bootstrap composes it from channels --
+   `rgba(var(--link-color-rgb), var(--link-opacity, 1))` -- which is why these
+   are triples and not hex. Without them every link and link-button stays
+   Carbon blue on a branded database. */
+:root {
+    --link-color-rgb: %(link_rgb)s;
+    --link-hover-color-rgb: %(link_hover_rgb)s;
+}
+
+/* .btn-link and .btn-light both carry the link colour: the theme maps
+   .btn-light to Carbon's GHOST button, whose label is link-primary. Odoo uses
+   it for the form's save and discard buttons, so without this those stay
+   Carbon blue on a branded database -- along with the icons inside them, which
+   inherit. */
+.btn-link,
+.btn-light {
+    --btn-color: %(link)s;
+    --btn-hover-color: %(link_hover)s;
+    --btn-active-color: %(link_hover)s;
+}
+
+/* The theme's own button maps compile "active" to $c-border-interactive, a
+   Carbon-blue literal, so an open dropdown or a pressed secondary button drew
+   a blue rim on an otherwise branded UI. */
+.btn-secondary,
+.btn-outline-secondary,
+.o-dropdown.btn-secondary {
+    --btn-active-border-color: %(brand)s;
+}
+
+/* dropdown.scss compiles the open state straight out of the button map --
+   `border-color: map-get($-value, 'active-border')` -- with no custom property
+   behind it, so an open dropdown kept a Carbon-blue rim no matter what the
+   brand was. Same specificity as Odoo's rule; this stylesheet simply loads
+   after it. */
+.o-dropdown.btn-secondary.show,
+.o-dropdown.btn-outline-secondary.show {
+    border-color: %(brand)s;
+}
+
 .btn-outline-primary {
     --btn-color: %(brand)s;
     --btn-border-color: %(brand)s;

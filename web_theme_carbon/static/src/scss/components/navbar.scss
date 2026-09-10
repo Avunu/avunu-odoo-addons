@@ -25,18 +25,32 @@
     }
 
     // Systray items centre their own content inconsistently: several
-    // components (the user avatar, the company switcher, the debug menu) put
-    // their content in a plain block which then sits at the TOP of the 48px
-    // bar -- measured at a 23.5px container midpoint against inner midpoints
-    // of 11 and 16. Carbon's header aligns everything on one optical line.
+    // components put their content in a plain block which then sits at the TOP
+    // of the 48px bar. Carbon's header aligns everything on one optical line.
     //
-    // Centring is done from the CONTAINER, not by setting display on the
-    // children: several of them carry Bootstrap's `d-none d-md-block`, which
-    // is `display: block !important`, so a `display: flex` on the child both
-    // loses and -- if forced with !important -- would defeat the responsive
+    // Centring is NOT done with `align-items: center` on the row. That does
+    // align them, but it also shrinks every item to its content height, so the
+    // hover backdrop collapses from the full 48px bar to a ~22px sliver around
+    // the icon -- which is how the Discuss button ended up looking pinched
+    // while the search button (which sets its own height) looked right.
+    //
+    // So the row keeps stretching its children, and the clickable element
+    // INSIDE each one is made full-height and centred. That is also why the
+    // children themselves are left alone: several carry Bootstrap's
+    // `d-none d-md-block`, which is `display: block !important`, so a
+    // `display: flex` on them both loses and would defeat the responsive
     // hiding those classes exist for.
     .o_menu_systray {
-        align-items: center;
+        align-items: stretch;
+
+        > * > .dropdown-toggle,
+        > * > button,
+        > *.o-dropdown,
+        > *.dropdown-toggle {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
     }
 
     // heading-compact-01: the product name is the one semibold thing up here.

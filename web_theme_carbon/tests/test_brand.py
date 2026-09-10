@@ -7,6 +7,7 @@ from unittest.mock import patch
 from odoo.tests.common import TransactionCase, tagged
 
 from ..models.res_company import (
+    rgb_triple,
     CARBON_DARK,
     CARBON_LIGHT,
     CARBON_SHELL,
@@ -200,3 +201,38 @@ class TestCarbonBrand(TransactionCase):
             type(self.company), "_carbon_palette", side_effect=ValueError("boom")
         ):
             self.assertEqual(self._style(), "")
+
+    # -- compiled Carbon blue that runtime tokens cannot reach ----------------
+
+    def test_rgb_triple(self):
+        """Bootstrap composes link colour from channels, not a hex string."""
+        self.assertEqual(rgb_triple("#0f62fe"), "15, 98, 254")
+        self.assertEqual(rgb_triple("#fff"), "255, 255, 255")
+        self.assertIsNone(rgb_triple("nope"))
+
+    def test_links_and_link_buttons_follow_the_brand(self):
+        """Odoo compiles $o-main-link-color to a literal.
+
+        The --cds-* tokens cannot reach an ordinary <a>, so every link and
+        link-button stayed Carbon blue on a branded database until these were
+        emitted. .btn-light is included because the theme maps it to Carbon's
+        ghost button, which Odoo uses for the form save/discard buttons.
+        """
+        self.company.carbon_brand_light = "#cd4c4c"
+        css = self._style()
+        self.assertIn("--link-color-rgb: 205, 76, 76", css)
+        self.assertIn("--link-hover-color-rgb", css)
+        self.assertIn(".btn-link", css)
+        self.assertIn(".btn-light", css)
+
+    def test_open_dropdown_border_follows_the_brand(self):
+        """dropdown.scss reads the button map directly, with no property behind it.
+
+        `border-color: map-get($-value, 'active-border')` compiles to a
+        Carbon-blue literal, so an open dropdown kept a blue rim regardless of
+        the brand. It needs a real rule, not a token.
+        """
+        self.company.carbon_brand_light = "#cd4c4c"
+        css = self._style()
+        self.assertIn(".o-dropdown.btn-secondary.show", css)
+        self.assertIn("border-color: #cd4c4c", css)
