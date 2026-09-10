@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC (avu.nu)
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <record id="twilio_composer_view_form" model="ir.ui.view">
+        <field name="name">twilio.composer.form</field>
+        <field name="model">twilio.composer</field>
+        <field name="arch" type="xml">
+            <form string="Send SMS">
+                <field name="res_model" invisible="1" />
+                <field name="res_id" invisible="1" />
+                <field name="find_gateway" invisible="1" />
+                <group>
+                    <field
+                        name="gateway_id"
+                        invisible="not find_gateway"
+                        options="{'no_create': True}"
+                    />
+                    <field name="number_field_name" />
+                    <field name="body" placeholder="Type your message..." />
+                </group>
+                <footer>
+                    <button
+                        name="action_send_twilio"
+                        type="object"
+                        string="Send"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="twilio_composer_action" model="ir.actions.act_window">
+        <field name="name">Send SMS</field>
+        <field name="res_model">twilio.composer</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="binding_view_types">form</field>
+    </record>
+</odoo>

@@ -1,0 +1,12 @@
+/* Copyright 2026 Avunu LLC (avu.nu)
+   License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). */
+
+/* Vuetify's own `.v-btn__content` collapses to a single line's height
+   rather than filling the button - fine for plain text, but it leaves
+   everything inside (our centered label, and the icon absolutely
+   positioned against it in login.esm.js) centered against that short
+   box instead of the full button. Scoped to this component's own
+   buttons, not every `.v-btn` in the app. */
+.login-oauth-btn .v-btn__content {
+    height: 100%;
+}

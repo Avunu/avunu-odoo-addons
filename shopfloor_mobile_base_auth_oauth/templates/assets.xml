@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026 Avunu LLC (avu.nu)
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+    <template
+        id="shopfloor_app_assets"
+        inherit_id="shopfloor_mobile_base.shopfloor_app_assets"
+    >
+        <script id="script_page_login" position="after">
+            <t t-set="mod_name" t-value="'shopfloor_mobile_base_auth_oauth'" />
+            <link
+                id="link_css_login_oauth"
+                t-attf-href="/shopfloor_mobile_base_auth_oauth/static/src/css/login.css?v=#{get_version(mod_name)}"
+                rel="stylesheet"
+            />
+            <script
+                id="script_login_oauth"
+                t-attf-src="/shopfloor_mobile_base_auth_oauth/static/src/login.esm.js?v=#{get_version(mod_name)}"
+                type="module"
+            />
+        </script>
+    </template>
+</odoo>

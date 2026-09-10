@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026 Avunu LLC (avu.nu)
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+    <record id="shopfloor_app_form_view" model="ir.ui.view">
+        <field name="name">shopfloor app form oauth</field>
+        <field name="model">shopfloor.app</field>
+        <field name="inherit_id" ref="shopfloor_base.shopfloor_app_form_view" />
+        <field name="arch" type="xml">
+            <field name="auth_type" position="after">
+                <field
+                    name="oauth_api_key_group_id"
+                    options="{'no_create': True}"
+                    invisible="auth_type != 'oauth'"
+                />
+                <field name="oauth_allow_signup" invisible="auth_type != 'oauth'" />
+                <field
+                    name="oauth_auto_provision_key"
+                    invisible="auth_type != 'oauth'"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>

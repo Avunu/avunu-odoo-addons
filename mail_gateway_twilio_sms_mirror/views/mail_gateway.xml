@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Avunu LLC (avu.nu)
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <record model="ir.ui.view" id="mail_gateway_form_view">
+        <field name="name">mail.gateway.form (twilio sms mirror)</field>
+        <field name="model">mail.gateway</field>
+        <field name="inherit_id" ref="mail_gateway_twilio.mail_gateway_form_view" />
+        <field name="arch" type="xml">
+            <field name="twilio_messaging_service_sid" position="after">
+                <field
+                    name="is_sms_mirror_target"
+                    invisible="gateway_type != 'twilio'"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>
