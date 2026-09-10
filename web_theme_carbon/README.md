@@ -115,6 +115,8 @@ lighter Blue 50 `#4589ff` on g100, because a mid-dark colour that reads well on
 `#f4f4f4` does not carry against `#161616`. Set only the light one and the dark
 variant is derived by lightening it; set both to control each exactly.
 
+Setting a header colour re-points Odoo's `--NavBar-*` custom properties as well as the bar itself, so the menu entries, their hover and active states and their labels all follow it. Without that they keep the compiled Carbon-shell tones and sit as opaque near-black blocks on a branded bar.
+
 Hover, active and text-on-brand are derived too — hover darkens in light and
 brightens in dark, and the label flips between near-black and near-white for
 contrast. Anything left empty falls back to Carbon's own value, so a company
