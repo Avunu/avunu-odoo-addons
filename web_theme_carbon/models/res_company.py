@@ -226,6 +226,11 @@ class ResCompany(models.Model):
             "link": brand,
             "link_hover": base["link_hover"] if is_carbon_default else shift(brand, 0.10 * direction),
             "brand_rgb": rgb_triple(brand) or "15, 98, 254",
+            # Bootstrap 5.3's "subtle" family, which it tints from $primary at
+            # compile time and re-exposes on :root.
+            "brand_bg_subtle": blend(brand, "#ffffff", 0.8),
+            "brand_border_subtle": blend(brand, "#ffffff", 0.6),
+            "brand_text_emphasis": shift(brand, 0.2),
             "link_rgb": rgb_triple(brand) or "15, 98, 254",
             "link_hover_rgb": (
                 rgb_triple(base["link_hover"] if is_carbon_default else shift(brand, 0.10 * direction))
@@ -318,14 +323,86 @@ class ResCompany(models.Model):
     --btn-disabled-bg: %(brand)s;
     --btn-disabled-border-color: %(brand)s;
 }
-/* Links. Odoo compiles $o-main-link-color into a literal, so the tokens above
-   cannot reach an ordinary <a>. Bootstrap composes it from channels --
-   `rgba(var(--link-color-rgb), var(--link-opacity, 1))` -- which is why these
-   are triples and not hex. Without them every link and link-button stays
-   Carbon blue on a branded database. */
+/* Bootstrap's theme colour. This is the single highest-leverage override
+   here: Odoo compiles $primary (= $o-brand-primary) to a literal, and
+   Bootstrap re-exposes it on :root, so EVERY .text-primary, .bg-primary,
+   .border-primary and every `rgba(var(--primary-rgb), ...)` tint reads from
+   these two. The company switcher's checked icon and its selected-row tint
+   are both this, and so is most stray blue elsewhere. */
 :root {
+    --primary: %(brand)s;
+    --primary-rgb: %(brand_rgb)s;
+    /* Bootstrap 5.3's subtle family. .bg-primary-subtle reads these straight
+       off :root, and it is what tints the company switcher's selected row. */
+    --primary-bg-subtle: %(brand_bg_subtle)s;
+    --primary-border-subtle: %(brand_border_subtle)s;
+    --primary-text-emphasis: %(brand_text_emphasis)s;
+
+    /* Links. Odoo compiles $o-main-link-color into a literal, so the tokens
+       above cannot reach an ordinary <a>. Bootstrap composes an anchor from
+       channels -- `rgba(var(--link-color-rgb), var(--link-opacity, 1))` --
+       but other rules read the plain --link-color, so both forms are needed. */
+    --link-color: %(link)s;
     --link-color-rgb: %(link_rgb)s;
     --link-hover-color-rgb: %(link_hover_rgb)s;
+}
+
+/* Odoo does NOT use Bootstrap's --primary-rgb for its utilities: it generates
+   .text-* and .bg-* itself through o-print-color(), which emits
+       --color: RGBA(...);  color: var(--color) !important;
+   So the utilities have to be re-pointed the same way the tag colours are --
+   by setting the custom property Odoo's own !important rule reads, rather than
+   trying to outrank it. The company switcher's checked icon (.text-primary)
+   and its selected-row tint (.bg-primary at low opacity) are both this. */
+.text-primary {
+    --color: rgba(%(brand_rgb)s, var(--text-opacity, 1));
+}
+
+.bg-primary {
+    --background-color: rgba(%(brand_rgb)s, var(--bg-opacity, 1));
+}
+
+.border-primary {
+    border-color: %(brand)s !important;
+}
+
+/* Odoo's own custom colour classes, generated from $o-text-colors-custom /
+   $o-bg-colors-custom through the same o-print-color() mixin. .text-action is
+   the one that shows: it colours the icons in the search dropdown. */
+.text-action {
+    --color: rgba(%(brand_rgb)s, var(--text-opacity, 1));
+}
+
+.bg-action {
+    --background-color: rgba(%(brand_rgb)s, var(--bg-opacity, 1));
+}
+
+/* The checkmark on a selected dropdown item is a ::before whose colour is
+   compiled from $link-color (webclient.scss), so the :root --link-color above
+   cannot reach it. */
+:not(.dropstart) > .dropdown-item.active:not(.dropdown-item_active_noarrow):before,
+:not(.dropstart) > .dropdown-item.selected:not(.dropdown-item_active_noarrow):before {
+    color: %(brand)s;
+}
+
+/* The status bar draws its current step with a ::before whose colour comes
+   straight out of the button map -- a Carbon-blue literal -- so it kept a blue
+   rim on a branded document. */
+.o_field_statusbar > .o_statusbar_status {
+    --o-statusbar-border-active: %(brand)s;
+}
+
+/* search_view.scss compiles `border-color: $input-focus-border-color` on
+   focus, again with no property behind it, so the search bar outlined itself
+   in Carbon blue while the input inside it was already branded. */
+.o_searchview:focus-within {
+    border-color: %(brand)s;
+}
+
+.o_searchview:focus-within + .o_searchview_dropdown_toggler {
+    border-top-color: %(brand)s;
+    border-right-color: %(brand)s;
+    border-bottom-color: %(brand)s;
 }
 
 /* .btn-link and .btn-light both carry the link colour: the theme maps
