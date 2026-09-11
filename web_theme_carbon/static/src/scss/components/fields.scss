@@ -10,20 +10,29 @@
 // is `transparent` in stock Odoo by design: monetary fields position a ghost
 // value behind the input to size it, and an opaque fill hides it.
 
+// --o-caret-color travels with --o-input-border-color: fields.scss sets the
+// pair together in each of these four states, and the many2one dropdown
+// caret is drawn from it (utils.scss, o-caret-down). Re-pointing only the
+// border left the caret on Odoo's compiled $o-action -- Carbon blue -- which
+// showed up as a blue triangle in an otherwise branded, focused cell.
 :root {
     --o-input-border-color: var(--cds-border-strong-01);
+    --o-caret-color: var(--cds-icon-primary);
 }
 
 .o_field_widget:focus-within {
     --o-input-border-color: var(--cds-focus);
+    --o-caret-color: var(--cds-focus);
 }
 
 .o_field_invalid {
     --o-input-border-color: var(--cds-support-error);
+    --o-caret-color: var(--cds-support-error);
 }
 
 .o_required_modifier {
     --o-input-border-color: var(--cds-border-strong-01);
+    --o-caret-color: var(--cds-icon-primary);
 }
 
 // Carbon's layering contract: a field sits one layer BELOW its container. On a

@@ -109,6 +109,23 @@
         box-shadow: none;
     }
 
+    // ONE ring: the cell's. Carbon's editable-cells pattern puts
+    // focus-outline('outline') on the table cell and nothing on the control
+    // inside it (tanstack-carbon/web-components/editable-cells:
+    // `cds-table-cell:focus`). The theme's generic input ring -- correct for a
+    // bare field in a form -- would otherwise draw a second, smaller outline
+    // inside the cell's, which is what a many2one in a sale-order line looked
+    // like. Same shape as the three wrapped search fields, one level down.
+    .o_data_row.o_selected_row > .o_data_cell {
+        .o_input:focus,
+        .o_input:focus-visible,
+        input:focus,
+        input:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+    }
+
     .o_data_row.o_selected_row > .o_data_cell.o_invalid_cell {
         background-color: var(--cds-field-01);
         box-shadow: inset 0 -1px 0 0 var(--cds-support-error);
