@@ -83,7 +83,7 @@ Components: list view (`cds--data-table`), fields, form sheet, statusbar
 
 Two Carbon patterns Odoo has no equivalent for. These are the only parts of the theme that are not pure CSS, so each is anchored on the most stable hook available and the cost of it breaking is stated.
 
-**Global search in the header** (Carbon UI Shell). Odoo's global search is the command palette, reachable only by Ctrl+K, which nobody discovers on their own. The header button opens that same palette rather than introducing a second search. Registered as a **systray item**, which the navbar renders straight from a registry — so there is no template inheritance here at all, and nothing to drift.
+**Global search in the header** (Carbon UI Shell). Odoo's global search is the command palette, reachable only by Ctrl+K, which nobody discovers on their own. The header button opens that same palette rather than introducing a second search — in its **menus** mode (the `/` namespace: every app and menu item, fuzzy matched), which is the comprehensive "take me anywhere" search and what the apps switcher uses. Ctrl+K keeps the default command mode, a HUD of the actions on the current screen, for people who know it is there. Registered as a **systray item**, which the navbar renders straight from a registry — so there is no template inheritance here at all, and nothing to drift.
 
 **Search on tables** (Carbon data-table toolbar). Filters the rows on screen, which is what Carbon's table search does and what Odoo's control-panel search does not — that one changes the domain and re-queries.
 
