@@ -3,7 +3,7 @@
 """``POST /mail_cloudflare/inbound/<key>`` over a real HTTP request.
 
 Requests are built by ``MockCloudflareCase._cf_post`` exactly the way the
-Email Worker builds them (raw ``message/rfc822`` body, ``X-Mail-Cloudflare-*``
+Email Worker builds them (raw ``message/rfc822`` body, ``X-Email-Relay-*``
 headers, ``v1=<hex HMAC-SHA256(secret, "<timestamp>." + body)>``), so the
 signature the controller accepts here is the one the Worker computes.
 
@@ -96,7 +96,7 @@ class TestInboundController(CloudflareCommon, HttpCase):
         partner = self._partner("Cloudflare inbound new")
         self.assertEqual(len(partner), 1)
         payload = self.assertJson(
-            response, 200, thread_id=partner.id, id="01JWORKERID000000000000000"
+            response, 200, remote_ref=str(partner.id), id="01JWORKERID000000000000000"
         )
         self.assertNotIn("error", payload)
         self.assertEqual(partner.email_normalized, "sylvie@agrolait.com")
@@ -122,7 +122,7 @@ class TestInboundController(CloudflareCommon, HttpCase):
                 extra="In-Reply-To: <root@agrolait.com>",
             )
         )
-        self.assertJson(response, 200, thread_id=partner.id)
+        self.assertJson(response, 200, remote_ref=str(partner.id))
         self.assertFalse(self._partner("Re: Cloudflare inbound thread"))
         partner.invalidate_recordset(["message_ids"])
         emails = partner.message_ids.filtered(lambda m: m.message_type == "email")
@@ -156,7 +156,7 @@ class TestInboundController(CloudflareCommon, HttpCase):
         )
         partner = self._partner("Cloudflare inbound alias")
         self.assertEqual(len(partner), 1)
-        self.assertJson(response, 200, thread_id=partner.id)
+        self.assertJson(response, 200, remote_ref=str(partner.id))
         # without the envelope there is nothing to match: not routed at all
         with mute_logger(MAIL_THREAD_LOGGER):
             response = self._post(
@@ -176,9 +176,9 @@ class TestInboundController(CloudflareCommon, HttpCase):
             subject="Cloudflare inbound twice", msg_id="<dup@agrolait.com>"
         )
         first = self.assertJson(self._post(body), 200)
-        self.assertTrue(first["thread_id"])
+        self.assertTrue(first["remote_ref"])
         # a Worker retry after a timeout is harmless
-        self.assertJson(self._post(body, attempt=2), 200, thread_id=False)
+        self.assertJson(self._post(body, attempt=2), 200, remote_ref=None)
         self.assertEqual(len(self._partner("Cloudflare inbound twice")), 1)
 
     # -- rejected --------------------------------------------------------------

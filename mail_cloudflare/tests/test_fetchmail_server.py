@@ -97,7 +97,7 @@ class TestFetchmailServer(CloudflareCommon):
         key, secret = server.cloudflare_webhook_key, server.cloudflare_webhook_secret
         self.assertTrue(key)
         self.assertTrue(secret)
-        self.assertIn("ODOO_WEBHOOK_SECRET", server.configuration)
+        self.assertIn("TENANT_<SLUG>", server.configuration)
         # switching away and back keeps the URL the Worker was deployed with
         server.write({"server_type": "imap"})
         server.write({"server_type": "cloudflare"})
@@ -148,7 +148,7 @@ class TestFetchmailServer(CloudflareCommon):
         self.assertNotEqual(server.cloudflare_webhook_secret, secret)
         self.assertEqual(len(server.cloudflare_webhook_secret), 43)
         self.assertEqual(action["tag"], "display_notification")
-        self.assertIn("ODOO_WEBHOOK_SECRET", action["params"]["message"])
+        self.assertIn("tenant's secret", action["params"]["message"])
 
     # -- confirm / fetch / cron ------------------------------------------------
 
@@ -231,11 +231,12 @@ class TestFetchmailServer(CloudflareCommon):
             self.assertIn("Cloudflare Email Worker", form.server_type_info)
             configuration = form.configuration
             for expected in (
-                "ODOO_INBOUND_URL",
-                "ODOO_WEBHOOK_SECRET",
-                "X-Mail-Cloudflare-Timestamp",
-                "X-Mail-Cloudflare-Signature",
-                "X-Mail-Cloudflare-Envelope-To",
+                "TENANT_<SLUG>",
+                "inboundUrl",
+                "X-Email-Relay-Tenant",
+                "X-Email-Relay-Timestamp",
+                "X-Email-Relay-Signature",
+                "X-Email-Relay-Envelope-To",
                 f"+/- {SIGNATURE_TOLERANCE} s",
                 "v1=",
                 "401",

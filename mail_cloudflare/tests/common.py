@@ -37,12 +37,12 @@ from odoo.addons.mail_cloudflare import cloudflare_api
 # signature covers ``"<timestamp>." + body`` (HMAC-SHA256, hex) and is sent as
 # ``v1=<hex>``; the same vector is pinned in the worker's unit tests.
 CF_INBOUND_ROUTE = "/mail_cloudflare/inbound/{key}"
-CF_HEADER_ID = "X-Mail-Cloudflare-Id"
-CF_HEADER_TIMESTAMP = "X-Mail-Cloudflare-Timestamp"
-CF_HEADER_SIGNATURE = "X-Mail-Cloudflare-Signature"
-CF_HEADER_ENVELOPE_FROM = "X-Mail-Cloudflare-Envelope-From"
-CF_HEADER_ENVELOPE_TO = "X-Mail-Cloudflare-Envelope-To"
-CF_HEADER_ATTEMPT = "X-Mail-Cloudflare-Attempt"
+CF_HEADER_ID = "X-Email-Relay-Id"
+CF_HEADER_TIMESTAMP = "X-Email-Relay-Timestamp"
+CF_HEADER_SIGNATURE = "X-Email-Relay-Signature"
+CF_HEADER_ENVELOPE_FROM = "X-Email-Relay-Envelope-From"
+CF_HEADER_ENVELOPE_TO = "X-Email-Relay-Envelope-To"
+CF_HEADER_ATTEMPT = "X-Email-Relay-Attempt"
 
 # A raw inbound message for ``MockEmail.format()`` (same placeholders as
 # test_mail's MAIL_TEMPLATE, inlined so the module does not depend on
