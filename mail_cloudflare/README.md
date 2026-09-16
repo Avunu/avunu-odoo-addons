@@ -2,8 +2,9 @@
 
 Send and receive Odoo email through Cloudflare, with no SMTP or IMAP provider in the loop.
 Outbound mail goes to the **Cloudflare Email Sending** REST API straight from `ir.mail_server`;
-inbound mail arrives from a **Cloudflare Email Worker** (the companion
-[`@avunu/mail-cloudflare-worker`](../worker/) package) over a signed HTTPS webhook and is fed to
+inbound mail arrives from the **Cloudflare email relay** (the
+[`@avunu/cloudflare-email-relay`](https://github.com/Avunu/cloudflare-email-relay) Worker, deployed
+per fleet) over a signed HTTPS webhook and is fed to
 `mail.thread.message_process()` — the same path IMAP polling and `odoo-mailgate.py` use, so
 aliases, reply threading, bounces and the Incoming Mail Server options all behave as they do today.
 
@@ -64,9 +65,10 @@ on it.
 *Settings → Technical → Incoming Mail Servers → New*, type **Cloudflare Email Worker**, optionally a
 *Create a New Record* fallback model, then *Test & Confirm*. The form shows the **Webhook URL**
 (derived from `web.base.url`, which must be `https://` — plain `http://` is accepted only on
-`localhost` for `wrangler dev`) and the **Webhook Secret**; copy them into the Worker's
-`ODOO_INBOUND_URL` and `ODOO_WEBHOOK_SECRET`. *Regenerate Secret* rotates the secret only (the URL
-stays), so only the Worker's secret needs updating afterwards.
+`localhost` for `wrangler dev`) and the **Webhook Secret**; hand them to the relay fleet's
+onboarding as the tenant's `inboundUrl` and `secret`, and route the alias domain's addresses to the
+relay Worker in Cloudflare's Email Routing. *Regenerate Secret* rotates the secret only (the URL
+stays), so only the tenant's relay secret needs updating afterwards.
 
 ### The webhook contract
 
@@ -74,14 +76,15 @@ stays), so only the Worker's secret needs updating afterwards.
 
 | Header | Meaning |
 | --- | --- |
-| `X-Mail-Cloudflare-Id` | the Worker's queue id (echoed back) |
-| `X-Mail-Cloudflare-Timestamp` | Unix seconds; rejected outside ± 300 s |
-| `X-Mail-Cloudflare-Signature` | `v1=` + hex `HMAC-SHA256(secret, "<timestamp>." + body)` |
-| `X-Mail-Cloudflare-Envelope-From` / `-To` | the SMTP envelope; written into the message as `Return-Path` / `Delivered-To` when absent |
+| `X-Email-Relay-Id` | the relay's queue id (echoed back) |
+| `X-Email-Relay-Tenant` | the tenant slug the relay routed by (logged) |
+| `X-Email-Relay-Timestamp` | Unix seconds; rejected outside ± 300 s |
+| `X-Email-Relay-Signature` | `v1=` + hex `HMAC-SHA256(secret, "<timestamp>." + body)` |
+| `X-Email-Relay-Envelope-From` / `-To` | the SMTP envelope; written into the message as `Return-Path` / `Delivered-To` when absent |
 
-| Response | Meaning | Worker reaction |
+| Response | Meaning | Relay reaction |
 | --- | --- | --- |
-| `200 {"ok": true, "thread_id": <id or false>}` | processed (`false`: duplicate, bounce or loop, deliberately ignored) | delivered |
+| `200 {"ok": true, "remote_ref": "<id>" or null}` | processed (`null`: duplicate, bounce or loop, deliberately ignored) | delivered |
 | `401` | bad or missing signature, stale timestamp | parked as rejected |
 | `404` | unknown key, server not confirmed or archived | parked as rejected |
 | `422` | no route: no alias matched and no fallback model | parked as rejected |
@@ -113,22 +116,14 @@ would lose the POST body.
   (SSL/TLS, user `api_token`, password = the token). No per-recipient result, and whether
   `Message-ID` survives is unverified.
 
-## Development & tests
+## Tests
 
-In the repository's dev shell (`direnv allow`, `devenv up`), with the dev mail catcher off — it is
-server-wide and would otherwise swallow every send the tests make:
+In an odoo-nix dev shell, with the dev mail catcher off — it is server-wide and would otherwise
+swallow every send the tests make:
 
 ```sh
 ODOO_MAILCATCH_ENABLED=0 python odoo/odoo-bin -c odoo.conf -d mc_test \
   -i mail_cloudflare --test-enable --test-tags /mail_cloudflare --stop-after-init
-ruff check mail_cloudflare && ruff format --check mail_cloudflare
-```
-
-What CI runs, from the repository root (a sandboxed Postgres and OCB install, no network):
-
-```sh
-nix build .#checks.x86_64-linux.ruff -L
-nix build .#checks.x86_64-linux.odoo-tests -L
 ```
 
 The test harness (`tests/common.py`) never opens a connection: `MockCloudflareCase` scripts the
@@ -137,6 +132,9 @@ against the running test server.
 
 ## Related
 
-- [`../worker/`](../worker/) — the Cloudflare Email Worker this module receives from.
+- [`Avunu/cloudflare-email-relay`](https://github.com/Avunu/cloudflare-email-relay) — the Worker this
+  module receives from, and the full wire contract.
+- [`Avunu/cloudflare-email-workers`](https://github.com/Avunu/cloudflare-email-workers) — the fleet
+  that deploys it and onboards tenants.
 - [Cloudflare Email Service docs](https://developers.cloudflare.com/email-service/) — sending API,
   header allow-list, limits, Email Routing.

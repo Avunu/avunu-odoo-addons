@@ -69,7 +69,7 @@
                             icon="fa-refresh"
                             class="btn-link px-0"
                             groups="base.group_system"
-                            confirm="Requests signed with the current secret will be rejected until the Worker's ODOO_WEBHOOK_SECRET is updated. Continue?"
+                            confirm="Requests signed with the current secret will be rejected until the relay's tenant secret is updated. Continue?"
                         />
                     </div>
                     <div

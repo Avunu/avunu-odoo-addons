@@ -27,7 +27,7 @@ from odoo.exceptions import UserError
 
 # Path the controller is mounted on; the server's key is the last segment.
 INBOUND_PATH = "/mail_cloudflare/inbound"
-# Signature scheme the Worker sends as ``X-Mail-Cloudflare-Signature``. The
+# Signature scheme the Worker sends as ``X-Email-Relay-Signature``. The
 # ``v1=`` prefix leaves room for rotating the algorithm without breaking
 # deployed Workers.
 SIGNATURE_SCHEME = "v1"
@@ -80,15 +80,16 @@ class FetchmailServer(models.Model):
         copy=False,
         readonly=True,
         groups="base.group_system",
-        help="Key the Email Worker signs every request with (its "
-        "ODOO_WEBHOOK_SECRET). Regenerate it to revoke a leaked secret, then "
-        "update the Worker.",
+        help="Key the Cloudflare email relay signs every request with (the "
+        '"secret" of this tenant\'s relay secret). Regenerate it to revoke a '
+        "leaked secret, then update the relay.",
     )
     cloudflare_webhook_url = fields.Char(
         string="Webhook URL",
         compute="_compute_cloudflare_webhook_url",
-        help="Where the Email Worker posts inbound messages (its "
-        "ODOO_INBOUND_URL). Built from the web.base.url system parameter.",
+        help="Where the Cloudflare email relay posts inbound messages (the "
+        '"inboundUrl" of this tenant\'s relay secret). Built from the '
+        "web.base.url system parameter.",
     )
 
     _sql_constraints = [  # noqa: RUF012 - Odoo's constraint declaration
@@ -144,25 +145,27 @@ class FetchmailServer(models.Model):
         fields) so the stored text never goes stale when ``web.base.url``
         changes or the secret is regenerated.
         """
-        return f"""Deploy the Cloudflare Email Worker (@avunu/mail-cloudflare-worker) and route
-the alias domain's addresses to it: Cloudflare > Email Routing > Send to a Worker.
+        return f"""Onboard this database as a tenant of the Cloudflare email relay
+(@avunu/cloudflare-email-relay) and route the alias domain's addresses to the
+relay Worker: Cloudflare > Email Routing > Send to a Worker.
 
-Worker environment:
-  ODOO_INBOUND_URL     the Webhook URL below (wrangler.jsonc "vars")
-  ODOO_WEBHOOK_SECRET  the Webhook Secret below (wrangler secret put)
+Tenant secret (the relay's TENANT_<SLUG>, a JSON object):
+  inboundUrl  the Webhook URL below
+  secret      the Webhook Secret below
 
 Every inbound message is POSTed to the Webhook URL as Content-Type
 message/rfc822 (the raw RFC 5322 message) with these headers:
-  X-Mail-Cloudflare-Id             Worker queue id of the message
-  X-Mail-Cloudflare-Timestamp      Unix seconds; rejected outside +/- {SIGNATURE_TOLERANCE} s
-  X-Mail-Cloudflare-Signature      {SIGNATURE_SCHEME}=<hex HMAC-SHA256(secret, "<timestamp>." + body)>
-  X-Mail-Cloudflare-Envelope-From  SMTP MAIL FROM (empty for bounces)
-  X-Mail-Cloudflare-Envelope-To    SMTP RCPT TO, the routed address
-  X-Mail-Cloudflare-Attempt        delivery attempt, starting at 1
+  X-Email-Relay-Id             relay queue id of the message
+  X-Email-Relay-Tenant         the tenant slug the relay routed by
+  X-Email-Relay-Timestamp      Unix seconds; rejected outside +/- {SIGNATURE_TOLERANCE} s
+  X-Email-Relay-Signature      {SIGNATURE_SCHEME}=<hex HMAC-SHA256(secret, "<timestamp>." + body)>
+  X-Email-Relay-Envelope-From  SMTP MAIL FROM (empty for bounces)
+  X-Email-Relay-Envelope-To    SMTP RCPT TO, the routed address
+  X-Email-Relay-Attempt        delivery attempt, starting at 1
 
 Responses (JSON):
-  200  delivered; {{"ok": true, "thread_id": <record id or false>}}
-  401  bad or missing signature, stale timestamp     -> Worker marks it rejected
+  200  delivered; {{"ok": true, "remote_ref": "<record id>" or null}}
+  401  bad or missing signature, stale timestamp     -> relay marks it rejected
   404  unknown key, server not confirmed or archived -> rejected
   422  no route: no alias matched, no fallback model -> rejected
   500  anything else                                 -> retried with back-off
@@ -209,7 +212,7 @@ Responses (JSON):
 
     def action_regenerate_cloudflare_webhook_secret(self):
         """New signing secret; the key (hence the URL) is left alone so only
-        the Worker's ``ODOO_WEBHOOK_SECRET`` needs updating."""
+        the relay's tenant secret needs updating."""
         for server in self:
             server.write({"cloudflare_webhook_secret": self._cloudflare_token()})
         return {
@@ -219,8 +222,9 @@ Responses (JSON):
                 "type": "warning",
                 "title": _("Webhook secret regenerated"),
                 "message": _(
-                    "Update ODOO_WEBHOOK_SECRET in the Email Worker: requests "
-                    "signed with the previous secret are rejected from now on."
+                    "Update this tenant's secret in the Cloudflare email relay: "
+                    "requests signed with the previous secret are rejected from "
+                    "now on."
                 ),
                 "sticky": True,
             },

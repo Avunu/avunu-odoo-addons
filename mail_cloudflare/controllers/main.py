@@ -2,16 +2,19 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 """Inbound webhook: ``POST /mail_cloudflare/inbound/<key>``.
 
-The Email Worker posts the raw RFC 5322 message (``Content-Type:
-message/rfc822``) with ``X-Mail-Cloudflare-Timestamp`` / ``-Signature``
-(``v1=<hex HMAC-SHA256 over "<timestamp>.<body>">``) and the envelope
-addresses; the controller looks the ``fetchmail.server`` up by key, verifies
-the signature and routes the message through ``message_process``.
+The Cloudflare email relay (``@avunu/cloudflare-email-relay``) posts the raw
+RFC 5322 message (``Content-Type: message/rfc822``) with
+``X-Email-Relay-Timestamp`` / ``-Signature`` (``v1=<hex HMAC-SHA256 over
+"<timestamp>.<body>">``) and the envelope addresses; the controller looks the
+``fetchmail.server`` up by key, verifies the signature and routes the message
+through ``message_process``.
 
-Status codes are the contract with the Worker's retry queue: 2xx is
+Status codes are the contract with the relay's retry queue: 2xx is
 delivered, 401/404/422 are permanent (``rejected``, no retry), anything else
 is retried with back-off. Error bodies carry a one-line reason at most, never
-a traceback.
+a traceback. The 200 body carries ``remote_ref``: the routed record's id as a
+string, or ``null`` when the message was deliberately ignored (duplicate,
+bounce, loop) — the same shape the Frappe integration answers with.
 """
 
 import logging
@@ -26,16 +29,17 @@ from ..models.fetchmail_server import INBOUND_PATH
 
 _logger = logging.getLogger(__name__)
 
-HEADER_ID = "X-Mail-Cloudflare-Id"
-HEADER_TIMESTAMP = "X-Mail-Cloudflare-Timestamp"
-HEADER_SIGNATURE = "X-Mail-Cloudflare-Signature"
-HEADER_ENVELOPE_FROM = "X-Mail-Cloudflare-Envelope-From"
-HEADER_ENVELOPE_TO = "X-Mail-Cloudflare-Envelope-To"
-HEADER_ATTEMPT = "X-Mail-Cloudflare-Attempt"
+HEADER_ID = "X-Email-Relay-Id"
+HEADER_TIMESTAMP = "X-Email-Relay-Timestamp"
+HEADER_SIGNATURE = "X-Email-Relay-Signature"
+HEADER_ENVELOPE_FROM = "X-Email-Relay-Envelope-From"
+HEADER_ENVELOPE_TO = "X-Email-Relay-Envelope-To"
+HEADER_ATTEMPT = "X-Email-Relay-Attempt"
+HEADER_TENANT = "X-Email-Relay-Tenant"
 
 
 class MailCloudflareController(Controller):
-    # ``auth="none"``: the Worker has no session, the HMAC is the credential.
+    # ``auth="none"``: the relay has no session, the HMAC is the credential.
     # ``readonly=False`` is mandatory: ``auth="none"`` routes default to a
     # read-only cursor (``http.py``, ``_check_and_complete_route_definition``)
     # and the ``ro->rw`` retry would run the handler twice. ``csrf=False``
@@ -59,11 +63,13 @@ class MailCloudflareController(Controller):
         request.update_env(user=SUPERUSER_ID)
         headers = request.httprequest.headers
         worker_id = headers.get(HEADER_ID) or False
+        tenant = headers.get(HEADER_TENANT) or False
         server = request.env["fetchmail.server"]._cloudflare_find_by_key(key)
         if not server:
             _logger.warning(
-                "Cloudflare inbound %s: no confirmed server for key %s...",
+                "Cloudflare inbound %s (tenant %s): no confirmed server for key %s...",
                 worker_id,
+                tenant,
                 key[:8],
             )
             return self._respond(404, error="unknown webhook key")
@@ -87,7 +93,7 @@ class MailCloudflareController(Controller):
             )
         except ValueError as error:
             # ``message_route`` found no alias and there is no fallback model
-            # (or the model refuses the message): permanent, the Worker must
+            # (or the model refuses the message): permanent, the relay must
             # not retry. The sender-safe message is the one core built.
             request.env.cr.rollback()
             _logger.info(
@@ -101,13 +107,15 @@ class MailCloudflareController(Controller):
             # Let ``service.model.retrying`` rerun the request on a fresh
             # transaction, as it does for every other controller.
             raise
-        except Exception:  # anything else is a 500, the Worker retries
+        except Exception:  # anything else is a 500, the relay retries
             request.env.cr.rollback()
             _logger.exception(
                 "Cloudflare inbound %s failed on %s", worker_id, server.name
             )
             return self._respond(500, error="internal error")
-        return self._respond(200, thread_id=thread_id or False, id=worker_id)
+        return self._respond(
+            200, remote_ref=str(thread_id) if thread_id else None, id=worker_id
+        )
 
     @staticmethod
     def _respond(status, error=None, **values):
