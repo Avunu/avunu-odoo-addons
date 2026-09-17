@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <record id="view_muk_ai_provider_form_cloudflare" model="ir.ui.view">
+        <field name="name">muk_ai.provider.form.cloudflare</field>
+        <field name="model">muk_ai.provider</field>
+        <field name="inherit_id" ref="muk_ai.view_muk_ai_provider_form"/>
+        <field name="arch" type="xml">
+            <button name="action_test_connection" position="after">
+                <button
+                    name="action_fetch_cloudflare_models"
+                    type="object"
+                    string="Fetch Models"
+                    invisible="name != 'cloudflare'"
+                />
+            </button>
+            <field name="api_key" position="attributes">
+                <attribute name="invisible">name == 'cloudflare'</attribute>
+            </field>
+            <field name="api_key" position="after">
+                <field
+                    name="cloudflare_account_id"
+                    invisible="name != 'cloudflare'"
+                    required="name == 'cloudflare'"
+                />
+                <field
+                    name="cloudflare_gateway_id"
+                    invisible="name != 'cloudflare'"
+                />
+                <field
+                    name="cloudflare_api_token"
+                    password="True"
+                    invisible="name != 'cloudflare'"
+                    required="name == 'cloudflare'"
+                />
+            </field>
+            <field name="api_region" position="attributes">
+                <attribute name="invisible">
+                    not api_region_options or name == 'cloudflare'
+                </attribute>
+            </field>
+            <field name="api_url" position="attributes">
+                <attribute name="invisible">
+                    api_region != 'custom' or name == 'cloudflare'
+                </attribute>
+                <attribute name="required">
+                    api_region == 'custom' and name != 'cloudflare'
+                </attribute>
+            </field>
+        </field>
+    </record>
+
+</odoo>
