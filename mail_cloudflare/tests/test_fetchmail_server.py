@@ -370,7 +370,7 @@ class TestFetchmailServer(CloudflareCommon):
     def test_prepare_message_keeps_existing_headers(self):
         Server = self.env["fetchmail.server"]
         body = (
-            b"delivered-to: already@example.com\r\n"
+            b"delivered-to: y@example.com\r\n"
             b"Return-Path: <bounce@example.com>\r\n"
             b"From: a@example.com\r\n\r\nDelivered-To: not-a-header\r\n"
         )
@@ -391,6 +391,26 @@ class TestFetchmailServer(CloudflareCommon):
                 b"Delivered-To: y@example.com\r\n"
             )
         )
+
+    def test_prepare_message_adds_recipient_after_forwarder(self):
+        """A forwarded message carries the forwarder's Delivered-To; the
+        address it was forwarded to must still be added."""
+        Server = self.env["fetchmail.server"]
+        body = (
+            b"Delivered-To: service@gmail.com\r\n"
+            b"Return-Path: <bounce@example.com>\r\n"
+            b"To: service@gmail.com\r\n\r\nhello"
+        )
+        prepared = Server._cloudflare_prepare_message(
+            body, "x@example.com", f"orders@{self.alias_domain}"
+        )
+        self.assertEqual(
+            prepared, f"Delivered-To: orders@{self.alias_domain}\r\n".encode() + body
+        )
+        parsed = self.env["mail.thread"].message_parse(
+            email.message_from_bytes(prepared, policy=email.policy.SMTP)
+        )
+        self.assertIn(f"orders@{self.alias_domain}", parsed["recipients"])
 
     def test_prepare_message_envelope_edge_cases(self):
         Server = self.env["fetchmail.server"]

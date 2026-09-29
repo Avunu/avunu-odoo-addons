@@ -47,6 +47,7 @@ LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "::1")
 _HEADER_NAME_RE = re.compile(rb"^([\x21-\x39\x3b-\x7e]+):", re.MULTILINE)
 _HEADER_BLOCK_END_RE = re.compile(rb"\r?\n\r?\n")
 _ENVELOPE_FORBIDDEN_RE = re.compile(r"[\x00-\x1f\x7f]")
+_DELIVERED_TO_RE = re.compile(rb"^delivered-to:[ \t]*(.*)$", re.MULTILINE | re.IGNORECASE)
 
 
 def _existing_header_names(body):
@@ -54,6 +55,16 @@ def _existing_header_names(body):
     match = _HEADER_BLOCK_END_RE.search(body)
     head = body[: match.start()] if match else body
     return {name.decode("ascii").lower() for name in _HEADER_NAME_RE.findall(head)}
+
+
+def _existing_delivered_to(body):
+    """Lower-cased values of the ``Delivered-To`` headers at the top of ``body``."""
+    match = _HEADER_BLOCK_END_RE.search(body)
+    head = body[: match.start()] if match else body
+    return {
+        value.decode("utf-8", "replace").strip().lower()
+        for value in _DELIVERED_TO_RE.findall(head)
+    }
 
 
 class FetchmailServer(models.Model):
@@ -365,6 +376,14 @@ Responses (JSON):
         """Prepend the envelope as ``Delivered-To`` / ``Return-Path`` headers
         when the raw message lacks them.
 
+        ``Delivered-To`` is added unless that exact address is already among
+        the existing ``Delivered-To`` values, not merely unless one exists: a
+        forwarded message (a Gmail auto-forward, say) already carries the
+        *forwarder's* ``Delivered-To``, and the address it was forwarded to
+        appears in no other header, so alias matching would never see it.
+        Every real MTA adds its own ``Delivered-To`` at each hop, and
+        ``message_parse`` joins every occurrence.
+
         ``message_parse`` builds ``to``/``recipients`` from ``Delivered-To``
         (``mail_thread.py``, ``message_parse``), which is what alias and
         catchall matching run on, and bounces are addressed to
@@ -378,7 +397,7 @@ Responses (JSON):
         envelope_to = self._cloudflare_check_envelope("envelope-to", envelope_to)
         present = _existing_header_names(body)
         lines = []
-        if envelope_to and "delivered-to" not in present:
+        if envelope_to and envelope_to.lower() not in _existing_delivered_to(body):
             lines.append(f"Delivered-To: {envelope_to}")
         if envelope_from is not None and "return-path" not in present:
             # An empty envelope sender (a bounce) is written as the null path.
