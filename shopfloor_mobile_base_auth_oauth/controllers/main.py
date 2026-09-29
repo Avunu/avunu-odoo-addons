@@ -11,6 +11,7 @@ from odoo import http
 from odoo.http import request
 
 from odoo.addons.auth_oauth.controllers.main import OAuthController
+from odoo.addons.auth_oidc.controllers.main import OpenIDLogin
 
 _logger = logging.getLogger(__name__)
 
@@ -54,6 +55,35 @@ class ShopfloorOAuthComplete(http.Controller):
             )
             return "oauth_error=no_key"
         return "apikey=" + werkzeug.urls.url_quote(key.key)
+
+
+class ShopfloorOpenIDLogin(OpenIDLogin):
+    """Apple mandates `response_mode=form_post` whenever an `id_token`-
+    flavored flow requests the `name`/`email` scopes - neither of
+    `auth_oidc`'s two flow implementations set it
+    (`shopfloor_app.py._oauth_provider_needs_form_post()` has the same
+    check, but only reaches the Shopfloor app's own pre-login page, since
+    that page builds its provider list by instantiating `OpenIDLogin()`
+    directly rather than going through Odoo's controller routing. The
+    plain `/web/login` screen calls `list_providers()` through that
+    routing, so overriding it here - the way `ShopfloorOAuthSignin` below
+    already overrides `/auth_oauth/signin` - is what's needed to fix it
+    too. That screen's own Apple button matters here: this module's
+    README has technicians use it once to link their Odoo user to an
+    Apple identity, which Shopfloor OAuth login alone can't do.
+    """
+
+    def list_providers(self):
+        providers = super().list_providers()
+        for provider in providers:
+            if "appleid.apple.com" in (provider.get("auth_endpoint") or ""):
+                parsed = werkzeug.urls.url_parse(provider["auth_link"])
+                params = werkzeug.urls.url_decode(parsed.query)
+                params["response_mode"] = "form_post"
+                provider["auth_link"] = parsed.replace(
+                    query=werkzeug.urls.url_encode(params)
+                ).to_url()
+        return providers
 
 
 class ShopfloorOAuthSignin(OAuthController):
