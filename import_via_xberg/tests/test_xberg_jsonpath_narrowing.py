@@ -13,7 +13,7 @@ from odoo.addons.import_via_xberg.models.base_import_pdf_template_line import (
 # regex `pattern`, for both a single header value and a multi-row column,
 # without depending on the real extraction pipeline.
 SAMPLE_ENVELOPE = {
-    "content": "HUNTER TRUCK\nDATE SHIPPED 8/20/2026",
+    "content": "EXAMPLE TRUCK\nDATE SHIPPED 8/20/2026",
     "tables": [
         {
             "cells": [

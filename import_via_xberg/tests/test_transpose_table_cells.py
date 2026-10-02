@@ -86,7 +86,7 @@ class TestTransposeTableCells(BaseCase):
         # raw `cells` - untouched by this function - is still the only
         # sane way to read it, which is exactly why callers add these
         # views alongside `cells` rather than replacing it).
-        self.assertEqual(_transpose_table_cells([["Order #:", "Y201243290:01"]]), ([], []))
+        self.assertEqual(_transpose_table_cells([["Order #:", "Y000000001:01"]]), ([], []))
 
     def test_add_table_cell_views_augments_without_removing_cells(self):
         document = {

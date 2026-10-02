@@ -10,10 +10,10 @@ from odoo.addons.base.tests.common import BaseCommon
 
 
 class TestXbergExtraction(BaseCommon):
-    """`huntertrucksales_13391.pdf` (tests/data/) is a real Hunter Truck
-    Sales purchase invoice - the same fixture the top-level `artifacts/`
-    directory uses to validate xberg's table extraction against a
-    real-world document.
+    """`sample_parts_invoice.pdf` (tests/data/) is a synthetic parts
+    invoice laid out like a real-world truck dealer invoice (one ruled
+    line-item table with a header row). Every name, address and number
+    in it is fictional.
     """
 
     def _data_file(self, filename):
@@ -52,11 +52,11 @@ class TestXbergExtraction(BaseCommon):
         self.assertIn("xberg", selection)
 
     def test_xberg_extraction_returns_parseable_document(self):
-        data = self._data_file("huntertrucksales_13391.pdf")
+        data = self._data_file("sample_parts_invoice.pdf")
         res = self._mixin().simple_pdf_text_extraction(data)
         self.assertEqual(len(res), 1)
         document = json.loads(res[0])
-        self.assertIn("HUNTER", document["content"])
+        self.assertIn("EXAMPLE TRUCK SALES", document["content"])
         self.assertTrue(document["tables"])
         table = document["tables"][0]
         self.assertIn("ITEM", table["cells"][0])
@@ -75,9 +75,9 @@ class TestXbergExtraction(BaseCommon):
         model = self.env["ir.model"]._get("res.partner")
         attachment = self.env["ir.attachment"].create(
             {
-                "name": "huntertrucksales_13391.pdf",
+                "name": "sample_parts_invoice.pdf",
                 "datas": b64encode(
-                    self._data_file("huntertrucksales_13391.pdf")
+                    self._data_file("sample_parts_invoice.pdf")
                 ),
             }
         )
@@ -151,6 +151,6 @@ class TestXbergExtraction(BaseCommon):
         wizard = self.env["wizard.base.import.pdf.preview"].new(
             {"extraction_mode": "xberg", "template_id": template.id}
         )
-        data = self._data_file("huntertrucksales_13391.pdf")
+        data = self._data_file("sample_parts_invoice.pdf")
         with self.assertRaises(UserError):
             wizard.simple_pdf_text_extraction(data)
