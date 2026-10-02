@@ -147,13 +147,13 @@ class TestCloudflareProvider(TransactionCase):
     def test_list_models_uses_gateway_filter_when_set(self):
         # Spend-limit filter values come back bare; model search results
         # are always "@cf/"-prefixed - this is the real shape of both.
-        self.provider.cloudflare_gateway_id = "millrun"
+        self.provider.cloudflare_gateway_id = "example-gateway"
         allowed = "ibm-granite/granite-4.0-h-micro"
         prefixed = f"@cf/{allowed}"
         searched_names = []
 
         def responder(url, params):
-            if "ai-gateway/gateways/millrun" in url:
+            if "ai-gateway/gateways/example-gateway" in url:
                 return {
                     "spend_limits": {
                         "rules": [
@@ -181,11 +181,11 @@ class TestCloudflareProvider(TransactionCase):
         # loosely-related result the gateway does NOT allow can come back
         # alongside the one that was actually asked for - only the exact
         # (prefix-normalized) match should survive.
-        self.provider.cloudflare_gateway_id = "millrun"
+        self.provider.cloudflare_gateway_id = "example-gateway"
         allowed = "ibm-granite/granite-4.0-h-micro"
 
         def responder(url, params):
-            if "ai-gateway/gateways/millrun" in url:
+            if "ai-gateway/gateways/example-gateway" in url:
                 return {
                     "spend_limits": {
                         "rules": [
@@ -211,10 +211,10 @@ class TestCloudflareProvider(TransactionCase):
         self.assertEqual({m["technical_name"] for m in models}, {f"@cf/{allowed}"})
 
     def test_list_models_falls_back_to_full_catalog_without_filter(self):
-        self.provider.cloudflare_gateway_id = "millrun"
+        self.provider.cloudflare_gateway_id = "example-gateway"
 
         def responder(url, params):
-            if "ai-gateway/gateways/millrun" in url:
+            if "ai-gateway/gateways/example-gateway" in url:
                 return {"spend_limits": {"rules": []}}
             return [
                 {

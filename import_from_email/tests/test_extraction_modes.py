@@ -43,7 +43,7 @@ class TestExtractionModes(BaseCommon):
         res = self._mixin("plaintext").simple_pdf_text_extraction(data)
         self.assertEqual(res, [data.decode("utf-8")])
         text = res[0]
-        self.assertIn("Order #: NPPLK-00005FVKRE", text)
+        self.assertIn("Order #: NPPLK-00000TESTA", text)
         self.assertIn("Cost $114.96 /Each", text)
         self.assertIn("Qty/Car 1", text)
 
@@ -52,7 +52,7 @@ class TestExtractionModes(BaseCommon):
         res = self._mixin("html").simple_pdf_text_extraction(data)
         self.assertTrue(res)
         text = res[0]
-        self.assertIn("NPPLK-00005FVKRE", text)
+        self.assertIn("NPPLK-00000TESTA", text)
         self.assertIn("265.75", text)
         self.assertIn("114.96", text)
         self.assertIn("Qty/Car", text)
@@ -109,4 +109,4 @@ class TestExtractionModes(BaseCommon):
         )
         grouped = line._parse_pdf_grouped()
         self.assertFalse(grouped["pypdf"])
-        self.assertIn("NPPLK-00005FVKRE", "".join(grouped["plaintext"]))
+        self.assertIn("NPPLK-00000TESTA", "".join(grouped["plaintext"]))

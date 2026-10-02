@@ -43,7 +43,7 @@ class TestEdiMailIntake(BaseCommon):
 
     def test_message_new_creates_exchange_record(self):
         msg_dict = {
-            "body": "<p>Order #: NPPLK-00005FVKRE</p>",
+            "body": "<p>Order #: NPPLK-00000TESTA</p>",
             "message_id": "<abc123@napaprolink.com>",
         }
         record = self.env["edi.exchange.record"].message_new(
@@ -56,7 +56,7 @@ class TestEdiMailIntake(BaseCommon):
         # round-trip needed, so `quick_exec` must see it as ready to process
         self.assertEqual(record.edi_exchange_state, "input_received")
         self.assertIn(
-            "NPPLK-00005FVKRE", b64decode(record.exchange_file).decode()
+            "NPPLK-00000TESTA", b64decode(record.exchange_file).decode()
         )
 
     def test_message_new_without_backend_id_raises(self):

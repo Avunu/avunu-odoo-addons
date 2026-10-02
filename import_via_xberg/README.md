@@ -37,11 +37,11 @@ So every table also gets two derived views, computed by `_transpose_table_cells(
 -   `cellsByHeader`: one object per data row (row 0 itself excluded), keyed by that column's header text - `xberg_jsonpath = "$.tables[0].cellsByHeader[*].Item"` narrows to every row's `Item` value regardless of which column it's actually in, one per line, ready for `pattern` to refine further (or just `pattern = "(.+)"` to take each value as-is).
 -   `cellsByIndex`: the same rows, keyed by stringified column index (`"0"`, `"1"`, ...) instead - always present even for a column whose header cell is blank (an image-only column, say), and immune to two columns sharing the same header text (`cellsByHeader` keeps only the later one in that case).
 
-**Not every table has a header row**, though - most of the small tables in a real document are label/value pairs (`[["Order #:", "Y201243290:01"], ["Dealer:", "H510 - Hunter Peterbilt"], ...]`) with no header semantics at all. Treating row 0 as a header there would turn the first pair's *values* into header keys for the second pair - nonsense. Rather than guess which shape a table is, `cellsByHeader`/`cellsByIndex` come back empty (`[]`) for a table with no real header, and `cells` is always left untouched alongside them - use whichever view actually fits the table you're looking at (check the live preview, or `import_preview`'s sample data, before writing the pattern).
+**Not every table has a header row**, though - most of the small tables in a real document are label/value pairs (`[["Order #:", "Y000000001:01"], ["Dealer:", "H000 - Example Truck Center"], ...]`) with no header semantics at all. Treating row 0 as a header there would turn the first pair's *values* into header keys for the second pair - nonsense. Rather than guess which shape a table is, `cellsByHeader`/`cellsByIndex` come back empty (`[]`) for a table with no real header, and `cells` is always left untouched alongside them - use whichever view actually fits the table you're looking at (check the live preview, or `import_preview`'s sample data, before writing the pattern).
 
 ## JSONPath + regex quick reference
 
-Verified against `jsonpath-ng` 1.8.0 and a real extraction (`tests/data/huntertrucksales_13391.pdf`). Each row below is one line's `xberg_jsonpath` (the narrowing step) paired with a `pattern` regex (the refining step) that runs against whatever it selects:
+Verified against `jsonpath-ng` 1.8.0 and a real extraction of the synthetic fixture `tests/data/sample_parts_invoice.pdf`. Each row below is one line's `xberg_jsonpath` (the narrowing step) paired with a `pattern` regex (the refining step) that runs against whatever it selects:
 
 | `xberg_jsonpath` | narrows to | `pattern` | result |
 |---|---|---|---|
