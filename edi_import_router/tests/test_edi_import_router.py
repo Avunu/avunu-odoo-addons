@@ -71,7 +71,7 @@ class TestEdiImportRouter(BaseCommon):
             {
                 "router_id": cls.router.id,
                 "exchange_type_id": cls.html_type.id,
-                "description": "NAPA order confirmation",
+                "description": "Parts supplier order confirmation",
             }
         )
         cls.pdf_target = Target.create(
@@ -202,13 +202,13 @@ class TestEdiImportRouter(BaseCommon):
     # -- classification ----------------------------------------------------
 
     def test_email_routed_with_body(self):
-        doc = self._email(body="<p>NPPLK-1</p>")
+        doc = self._email(body="<p>ORD-1</p>")
         client = self._run(doc, str(self.html_target.id))
         self.assertEqual(doc.state, "routed")
         exchange = doc.exchange_record_id
         self.assertEqual(exchange.type_id, self.html_type)
         self.assertEqual(exchange.edi_exchange_state, "input_received")
-        self.assertEqual(base64.b64decode(exchange.exchange_file), b"<p>NPPLK-1</p>")
+        self.assertEqual(base64.b64decode(exchange.exchange_file), b"<p>ORD-1</p>")
         criteria = client.system_one.call_args.kwargs["questions"]["exchange_type"]
         self.assertIn("none", criteria.criteria)
 
@@ -241,12 +241,12 @@ class TestEdiImportRouter(BaseCommon):
     def test_original_sender_from_forwarded_header(self):
         body = (
             "<div>FYI<br>---------- Forwarded message ---------<br>"
-            "From: <b>OPC</b> &lt;onlinepartscounter@paccar.com&gt;<br>"
+            "From: <b>OPC</b> &lt;parts-counter@supplier.example&gt;<br>"
             "Date: Mon<br>Subject: OPC Order Confirmation</div><p>Thanks</p>"
         )
         doc = self._email(body=body)
         state = doc._router_typesafe_state()
-        self.assertIn("onlinepartscounter@paccar.com", state["original from"])
+        self.assertIn("parts-counter@supplier.example", state["original from"])
         self.assertEqual(state["from"], "a@b.c")
         self.assertNotIn("original from", self._email(body="<p>x</p>")._router_typesafe_state())
 
