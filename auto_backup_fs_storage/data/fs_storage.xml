@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Credentials are never stored: $VARs are read from the server's
+         environment (BACKUPS_*), provisioned from an agenix secret. -->
+    <record id="odoo_backup" model="fs.storage">
+        <field name="name">Odoo backups</field>
+        <field name="code">odoo_backup</field>
+        <field name="protocol">s3</field>
+        <field name="eval_options_from_env" eval="True" />
+        <field
+            name="options"
+        >{"endpoint_url": "$BACKUPS_URL", "key": "$BACKUPS_ACCESS_KEY", "secret": "$BACKUPS_SECRET_KEY"}</field>
+        <field name="directory_path">$BACKUPS_BUCKET/$BACKUPS_PREFIX</field>
+    </record>
+</odoo>
