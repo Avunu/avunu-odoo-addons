@@ -20,6 +20,7 @@ These modules extend the OCA `base_import_pdf_by_template` so that a PDF, an ema
 
 | Module | What it does | License |
 | --- | --- | --- |
+| [`auto_backup_fs_storage`](auto_backup_fs_storage/README.md) | FS Storage (S3, ...) destination for OCA `auto_backup`, with env-var credentials | AGPL-3.0-or-later |
 | [`base_import_pdf_by_template_engine`](base_import_pdf_by_template_engine/README.md) | Two small extension points on the base module so other pattern engines and tooling can plug in without copying its methods; also fixes two table-extraction bugs | AGPL-3.0-or-later |
 | [`import_preview`](import_preview/README.md) | A persistent sample document per template and a live preview of what each line's pattern matches, right in the line dialog | AGPL-3.0-or-later |
 | [`import_via_xberg`](import_via_xberg/README.md) | An `xberg` extraction mode for structured (JSON) document parsing, plus optional JSONPath narrowing on template lines | AGPL-3.0-or-later |
@@ -70,6 +71,7 @@ Each module's `__manifest__.py` is the source of truth. Besides Odoo core module
 | `mail_cloudflare` | none beyond core | none |
 | `mail_gateway_twilio` | `mail_gateway` ([OCA/social](https://github.com/OCA/social)) | none |
 | `mail_gateway_twilio_sms_mirror` | `mail_gateway_twilio` (this repository) | none |
+| `auto_backup_fs_storage` | `auto_backup` (OCA/server-tools) and `fs_storage` (OCA/storage) | none |
 | `base_import_pdf_by_template_engine` | `base_import_pdf_by_template` ([OCA/edi](https://github.com/OCA/edi)) | none |
 | `import_preview` | `base_import_pdf_by_template_engine` (this repository) | none |
 | `import_via_xberg` | `base_import_pdf_by_template_engine` (this repository) | `jsonpath_ng`, `xberg` |

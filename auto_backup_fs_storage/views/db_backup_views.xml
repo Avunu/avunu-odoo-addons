@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_backup_conf_form" model="ir.ui.view">
+        <field name="name">db.backup.form.fs_storage</field>
+        <field name="model">db.backup</field>
+        <field name="inherit_id" ref="auto_backup.view_backup_conf_form" />
+        <field name="arch" type="xml">
+            <field name="method" position="after">
+                <field
+                    name="fs_storage_id"
+                    invisible="method != 'fs_storage'"
+                    required="method == 'fs_storage'"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>
