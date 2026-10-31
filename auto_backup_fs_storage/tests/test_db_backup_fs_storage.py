@@ -5,7 +5,9 @@ import os
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+from odoo.service import db
 from odoo.tests import TransactionCase, tagged
+from odoo.tools import config
 
 
 @tagged("post_install", "-at_install")
@@ -53,6 +55,14 @@ class TestDbBackupFsStorage(TransactionCase):
         self.assertTrue(files[0].endswith(".dump"))
         with self.storage.fs.open(files[0], "rb") as f:
             self.assertEqual(f.read(), b"PGDMP-fake")
+
+    def test_backup_with_list_db_disabled(self):
+        guarded = db.check_db_management_enabled(self._dump)
+        with patch("odoo.service.db.dump_db", guarded), patch.dict(
+            config.options, {"list_db": False}
+        ):
+            self.backup.action_backup()
+        self.assertEqual(len(self.storage.fs.ls("mydb", detail=False)), 1)
 
     def test_retention(self):
         fs = self.storage.fs

@@ -44,7 +44,12 @@ class DbBackup(models.Model):
                 fs = rec.fs_storage_id.fs
                 folder = rec._fs_backup_dir()
                 fs.makedirs(folder, exist_ok=True)
-                cached = db.dump_db(
+                # dump_db is gated by check_db_management_enabled, which
+                # refuses everything when list_db = False. That gate guards
+                # the public database manager, not this server-side cron, so
+                # call the undecorated function.
+                dump_db = getattr(db.dump_db, "__wrapped__", db.dump_db)
+                cached = dump_db(
                     self.env.cr.dbname, None, backup_format=rec.backup_format
                 )
                 with cached, fs.open(os.path.join(folder, filename), "wb") as dest:
